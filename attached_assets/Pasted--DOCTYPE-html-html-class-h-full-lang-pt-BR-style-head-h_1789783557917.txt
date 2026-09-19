@@ -1,0 +1,232 @@
+<!DOCTYPE html><html class="h-full" lang="pt-BR" style=""><head></head>
+<body class="min-h-full font-sans text-slate-800 antialiased flex flex-col justify-between p-4 sm:p-6 lg:p-8"><svg aria-hidden="true" class="inline-defs-container" style="position:absolute;width:0;height:0;overflow:hidden">
+<defs>
+<linearGradient gradientUnits="userSpaceOnUse" id="mainLeafGrad" x1="100" x2="300" y1="50" y2="350">
+<stop stop-color="#059669"></stop>
+<stop offset="0.5" stop-color="#047857"></stop>
+<stop offset="1" stop-color="#064e3b"></stop>
+</linearGradient>
+</defs>
+</svg>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>EcologiTrack - Plataforma de Acesso Corporativo</title>
+<!-- Tailwind CSS v3 with forms and container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#0f392b',
+              950: '#07241b',
+            }
+          },
+          boxShadow: {
+            'card': '0 25px 60px -15px rgba(5, 26, 18, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04)',
+            'inner-glow': 'inset 0 1px 1px 0 rgba(255, 255, 255, 0.2)',
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-decorations">
+    /* Subtle background mesh gradient inspired by high-end design showcases */
+    body {
+      background-color: #f1f5f9;
+      background-image:
+        radial-gradient(at 15% 15%, rgba(22, 101, 52, 0.07) 0px, transparent 55%),
+        radial-gradient(at 85% 85%, rgba(30, 64, 175, 0.05) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, #f8fafc 0px, #edf2f7 100%);
+    }
+
+    /* Architectural concentric target circle animation */
+    @keyframes pulse-ring {
+      0% {
+        transform: scale(0.95);
+        opacity: 0.8;
+      }
+
+      50% {
+        transform: scale(1.08);
+        opacity: 0.4;
+      }
+
+      100% {
+        transform: scale(0.95);
+        opacity: 0.8;
+      }
+    }
+
+    .pulse-tracker {
+      animation: pulse-ring 4s ease-in-out infinite;
+    }
+  </style>
+<!-- BEGIN: TopNavigation -->
+<header class="w-full max-w-6xl mx-auto flex items-center justify-between py-2 px-1" data-purpose="site-header">
+<!-- Brand Logo Mark Header -->
+
+<!-- Quick Support Link -->
+<div class="flex items-center space-x-6 text-sm">
+<a class="text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1.5 text-xs font-medium" href="#help-center">
+
+
+</a>
+<div class="h-3.5 w-[1px] bg-slate-200 hidden sm:block"></div>
+</div>
+</header>
+<!-- END: TopNavigation -->
+<!-- BEGIN: MainContentCard -->
+<main class="w-full max-w-sm lg:max-w-5xl mx-auto my-auto py-4 sm:py-6" data-purpose="auth-container">
+<div class="bg-white rounded-3xl shadow-card overflow-hidden flex flex-col lg:grid lg:grid-cols-12 border border-slate-100">
+<!-- BEGIN: VisualShowcaseColumn -->
+<section class="lg:col-span-6 bg-gradient-to-br from-[#06241b] via-[#0b3327] to-[#041913] p-6 sm:p-10 lg:p-12 relative flex flex-col justify-between overflow-hidden text-white h-52 lg:h-auto lg:min-h-[580px]" data-purpose="art-showcase-panel">
+<div class="absolute inset-0 z-0">
+
+<div class="absolute inset-0 bg-gradient-to-t from-[#06241b]/90 via-[#06241b]/30 to-transparent"></div>
+</div>
+<!-- Pulsing Tracker Element -->
+
+<div class="relative z-10">
+
+</div>
+<div class="relative z-10 pt-4 lg:pt-8 flex items-center justify-between text-[11px] font-mono tracking-wider text-emerald-300/80 uppercase">
+
+
+</div>
+</section>
+<!-- END: VisualShowcaseColumn -->
+<!-- BEGIN: LoginFormColumn -->
+<section class="lg:col-span-6 p-6 sm:p-10 lg:p-12 flex flex-col justify-between bg-white -mt-6 rounded-t-3xl lg:mt-0 lg:rounded-none relative z-20 shadow-inner-glow lg:shadow-none" data-purpose="login-form-panel">
+<!-- Form Header -->
+<div class="space-y-1 mb-6 lg:mb-8">
+<h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+            Iniciar sessão
+          </h1>
+<p class="text-xs sm:text-sm text-slate-500 font-normal">
+            Digite suas credenciais corporativas para continuar.
+          </p>
+</div>
+<!-- Interactive Form -->
+<form action="#" class="space-y-4 lg:space-y-5" data-purpose="credential-form" method="POST" onsubmit="event.preventDefault();">
+<!-- Corporate Email Input Field -->
+<div class="space-y-1.5">
+<label class="block text-xs font-semibold tracking-wide text-slate-700 uppercase" for="corporate-email">
+              E-MAIL CORPORATIVO
+            </label>
+<input class="block w-full px-4 py-3 bg-slate-50/60 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 transition duration-150" id="corporate-email" name="email" placeholder="nome@empresa.com.br" required="" type="email" value="juliana.prado@empresa.com.br">
+</div>
+<!-- Password Input Field -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between">
+<label class="block text-xs font-semibold tracking-wide text-slate-700 uppercase" for="user-password">
+                SENHA
+              </label>
+<a class="text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:underline transition-colors" href="#forgot-password">
+                Esqueceu a senha?
+              </a>
+</div>
+<div class="relative rounded-xl shadow-sm">
+<input class="block w-full px-4 pr-11 py-3 bg-slate-50/60 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 transition duration-150 tracking-wider" id="user-password" name="password" placeholder="••••••••••••" required="" type="password" value="SecureAuthPass2026!">
+<button aria-label="Toggle password visibility" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none" id="toggle-password-btn" type="button">
+<svg class="h-4.5 w-4.5 text-slate-400 hover:text-slate-600 transition-colors" fill="none" id="eye-icon" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+<!-- Remember Credentials Checkbox -->
+<div class="flex items-center pt-0.5">
+<input checked="" class="h-4 w-4 text-emerald-800 focus:ring-emerald-700/30 border-slate-300 rounded cursor-pointer transition" id="remember-credentials" name="remember" type="checkbox">
+<label class="ml-2.5 block text-xs font-medium text-slate-600 cursor-pointer select-none" for="remember-credentials">
+              Lembrar credenciais
+            </label>
+</div>
+<!-- Primary Submit Action Button -->
+<button class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-900 to-emerald-800 hover:from-emerald-950 hover:to-emerald-900 text-white text-sm font-semibold tracking-wide shadow-md hover:shadow-lg focus:ring-2 focus:ring-emerald-700/50 active:scale-[0.99] transition-all duration-150 cursor-pointer" type="submit">
+<span class="">Entrar</span>
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2">
+</path>
+</svg>
+</button>
+<!-- Divider -->
+<div class="relative my-4 flex items-center justify-center">
+<div class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-slate-200"></div>
+</div>
+<span class="relative px-3 bg-white text-[11px] uppercase tracking-wider text-slate-400 font-medium">OU CONECTE COM</span>
+</div>
+<!-- Enterprise Single Sign-On (Microsoft SSO) -->
+<button class="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold shadow-sm hover:border-slate-300 active:scale-[0.99] transition-all duration-150 cursor-pointer" type="button">
+<svg class="w-4 h-4" viewBox="0 0 21 21">
+<rect fill="#f25022" height="9" width="9" x="1" y="1"></rect>
+<rect fill="#7fba00" height="9" width="9" x="11" y="1"></rect>
+<rect fill="#00a4ef" height="9" width="9" x="1" y="11"></rect>
+<rect fill="#ffb900" height="9" width="9" x="11" y="11"></rect>
+</svg>
+<span class="">Continuar com SSO Corporativo</span>
+</button>
+</form>
+</section>
+<!-- END: LoginFormColumn -->
+</div>
+</main>
+<!-- END: MainContentCard -->
+<!-- BEGIN: PageFooter -->
+<footer class="w-full max-w-6xl mx-auto py-3 px-2 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400 font-normal" data-purpose="site-footer">
+<div class="">
+      © 2026 EcologiTrack. Todos os direitos reservados.
+    </div>
+<div class="flex items-center space-x-5">
+<a class="hover:text-slate-600 transition-colors" href="#terms">Termos de Uso</a>
+<span class="text-slate-300">•</span>
+<a class="hover:text-slate-600 transition-colors" href="#privacy">Política de Privacidade</a>
+<span class="text-slate-300"><br></span>
+</div>
+</footer>
+<!-- END: PageFooter -->
+<!-- Scripts for client-side password toggle interactivity -->
+<script data-purpose="password-visibility-handler">
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggleBtn = document.getElementById('toggle-password-btn');
+      const passwordInput = document.getElementById('user-password');
+      const eyeIcon = document.getElementById('eye-icon');
+
+      if (toggleBtn && passwordInput && eyeIcon) {
+        toggleBtn.addEventListener('click', () => {
+          const isPassword = passwordInput.type === 'password';
+          passwordInput.type = isPassword ? 'text' : 'password';
+
+          // Switch between eye open and eye slashed SVG paths
+          if (isPassword) {
+            eyeIcon.innerHTML = `
+              <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+            `;
+          } else {
+            eyeIcon.innerHTML = `
+              <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            `;
+          }
+        });
+      }
+    });
+  </script>
+
+
+</body></html>

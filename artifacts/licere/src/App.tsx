@@ -1,14 +1,14 @@
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type FormEvent, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Link, Route, Switch, Router as WouterRouter, useLocation } from 'wouter';
 import {
-  ArrowDownRight, ArrowUpRight, Bell, CalendarDays, Check, ChevronDown, ChevronRight,
-  CircleHelp, ClipboardCheck, Download, FileText, Filter, FolderOpen, LayoutDashboard,
-  Leaf, ListFilter, Menu, MoreHorizontal, Plus, Search, ShieldCheck, SlidersHorizontal,
-  Sparkles, X, Zap,
+  ArrowDownRight, ArrowRight, ArrowUpRight, Bell, CalendarDays, Check, CheckCircle2,
+  ChevronDown, ChevronRight, CircleHelp, ClipboardCheck, Download, Eye, EyeOff, FileText,
+  Filter, FolderOpen, LayoutDashboard, Leaf, ListFilter, LogIn, Menu, MoreHorizontal,
+  Plus, Search, ShieldCheck, SlidersHorizontal, Sparkles, X, Zap,
 } from 'lucide-react';
 import NotFound from '@/pages/not-found';
 
@@ -68,7 +68,13 @@ const useLocal = <T,>(key: string, fallback: T): [T, (value: T | ((old: T) => T)
 };
 
 function Mark({ className = '' }: { className?: string }) {
-  return <span className={cn('licere-mark', className)} aria-hidden="true"><span /><span /><span /></span>;
+  return <span className={cn('licere-mark', className)} aria-hidden="true">
+    <svg viewBox="0 0 32 32" role="img" focusable="false">
+      <path d="M11 5.25h6.1c6.03 0 10.9 4.87 10.9 10.88S23.13 27 17.1 27 6.25 22.13 6.25 16.13c0-3.72 1.86-7.13 4.75-9.1" />
+      <path d="M11 10.15v11.7h5.66a5.72 5.72 0 0 0 0-11.44H11" />
+      <path d="M16.72 15.3h4.18" />
+    </svg>
+  </span>;
 }
 function StatusPill({ status }: { status: Status | string }) {
   const tone = status === 'Regular' || status === 'Vigente' || status === 'Concluída' || status === 'Operando' ? 'good' : status === 'A vencer' || status === 'Em análise' || status === 'Em expansão' ? 'warn' : 'bad';
@@ -90,7 +96,7 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
     <div className="workspace-switcher"><span className="workspace-avatar">O</span><span><b>Operações Brasil</b><small>Ambiente &amp; Compliance</small></span><ChevronDown size={15} /></div>
     <nav className="nav-list" aria-label="Navegação principal">{nav.map(({ href, label, icon: NavIcon, count }) => <Link key={href} href={href} onClick={onClose} data-testid={`link-${label.toLowerCase()}`} className={cn('nav-item', (location === href || (href !== '/' && location.startsWith(href))) && 'nav-item-active')}><NavIcon size={18} strokeWidth={1.8} /><span>{label}</span>{count && <em>{count}</em>}</Link>)}</nav>
     <div className="sidebar-note"><Sparkles size={16} /><div><b>Leitura recomendada</b><span>Você tem 3 itens que pedem atenção esta semana.</span><Link href="/licencas" onClick={onClose}>Ver prioridades <ChevronRight size={13} /></Link></div></div>
-    <div className="sidebar-bottom"><Link href="/documentos" onClick={onClose} className="help-link"><CircleHelp size={17} />Central de ajuda</Link><div className="profile"><span className="profile-avatar">MA</span><span><b>Marina Azevedo</b><small>Administradora</small></span><MoreHorizontal size={16} /></div></div>
+     <div className="sidebar-bottom"><Link href="/documentos" onClick={onClose} className="help-link"><CircleHelp size={17} />Central de ajuda</Link><Link href="/login" onClick={onClose} className="help-link access-link"><LogIn size={17} />Acesso de demonstração</Link><div className="profile"><span className="profile-avatar">MA</span><span><b>Marina Azevedo</b><small>Administradora</small></span><MoreHorizontal size={16} /></div></div>
   </aside>;
 }
 function Topbar({ onMenu, onQuickAdd }: { onMenu: () => void; onQuickAdd: () => void }) {
@@ -153,6 +159,52 @@ function DetailPanel({ item, onClose, onSave }: { item: Licenca | Condicionante 
   return <div className="drawer-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}><section className="detail-drawer animate-fade" aria-label="detalhes"><div className="drawer-head"><div><p className="eyebrow">{isLicense ? 'Detalhes da licença' : isCondition ? 'Detalhes da obrigação' : 'Detalhes do documento'}</p><h2>{title}</h2><span>{subtitle}</span></div><IconButton label="fechar detalhes" onClick={onClose}><X size={18} /></IconButton></div><div className="drawer-content">{!isCondition && <div className="drawer-file"><span className="document-icon"><FileText size={20} /></span><span><b>{isLicense ? draft.orgao : draft.categoria}</b><small>{isLicense ? `Emissão ${formatDate(draft.emissao)}` : `Atualizado em ${draft.atualizadoEm}`}</small></span><Download size={17} /></div>}<label className="field-label">Observação <textarea value={isLicense ? draft.observacao : isCondition ? draft.titulo : draft.nome} onChange={(e) => setDraft(isLicense ? { ...draft, observacao: e.target.value } : isCondition ? { ...draft, titulo: e.target.value } : { ...draft, nome: e.target.value })} /></label><div className="drawer-facts">{isLicense && <><div><span>Vencimento</span><b>{formatDate(draft.vencimento)}</b></div><div><span>Criticidade</span><b>{draft.criticidade}</b></div></>}{isCondition && <><div><span>Responsável</span><b>{draft.responsavel}</b></div><div><span>Prazo</span><b>{formatDate(draft.prazo)}</b></div></>}{!isLicense && !isCondition && <><div><span>Validade</span><b>{draft.validade}</b></div><div><span>Tamanho</span><b>{draft.tamanho}</b></div></>}</div><div className="drawer-status"><span>Status atual</span><StatusPill status={draft.status} /></div></div><div className="drawer-foot"><button className="quiet-btn" onClick={onClose}>Cancelar</button><button className="primary-btn" onClick={() => { onSave(draft); onClose(); }}><Check size={16} />Salvar alterações</button></div></section></div>;
 }
 function QuickAdd({ onClose, onCreate }: { onClose: () => void; onCreate: (kind: 'licenca' | 'condicionante' | 'documento') => void }) { return <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}><section className="quick-modal animate-fade"><div className="drawer-head"><div><p className="eyebrow">Ação rápida</p><h2>O que você quer registrar?</h2><span>Comece pela informação que precisa entrar no radar.</span></div><IconButton label="fechar adicionar" onClick={onClose}><X size={18} /></IconButton></div><div className="quick-options"><button onClick={() => { onCreate('licenca'); onClose(); }} data-testid="button-quick-licenca"><span className="quick-option-icon green"><ShieldCheck size={20} /></span><span><b>Nova licença</b><small>Cadastre um ato autorizativo</small></span><ChevronRight size={16} /></button><button onClick={() => { onCreate('condicionante'); onClose(); }} data-testid="button-quick-condicionante"><span className="quick-option-icon sand"><ClipboardCheck size={20} /></span><span><b>Nova condicionante</b><small>Adicione uma obrigação para acompanhar</small></span><ChevronRight size={16} /></button><button onClick={() => { onCreate('documento'); onClose(); }} data-testid="button-quick-documento"><span className="quick-option-icon blue"><FileText size={20} /></span><span><b>Novo documento</b><small>Guarde uma evidência no acervo</small></span><ChevronRight size={16} /></button></div></section></div>; }
+function Login() {
+  const [, setLocation] = useLocation();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(true);
+  const [feedback, setFeedback] = useState('');
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setFeedback('Acesso demonstrativo reconhecido. Você já pode explorar o workspace.');
+  };
+
+  return <div className="login-page">
+    <header className="login-header">
+      <Link href="/" className="login-brand" data-testid="link-login-brand"><Mark /><span>licere</span></Link>
+      <div className="login-header-help"><span>Ambiente de demonstração</span><Link href="/documentos" data-testid="link-login-help">Precisa de ajuda?</Link></div>
+    </header>
+    <main className="login-main">
+      <section className="login-card" aria-label="Acesso à Licere">
+        <div className="login-visual">
+          <div className="visual-grid" />
+          <div className="visual-orbit visual-orbit-one" />
+          <div className="visual-orbit visual-orbit-two" />
+          <div className="visual-core"><Mark /><span>Rastro claro<br />para decisões responsáveis.</span></div>
+          <div className="visual-caption"><span>LICERE / OPERAÇÕES BRASIL</span><b>Conformidade que<br />se deixa ler.</b></div>
+          <div className="visual-foot"><span>01</span><i /><span>MEIO AMBIENTE · EHS · COMPLIANCE</span></div>
+        </div>
+        <section className="login-form-panel">
+          <div className="login-form-heading"><p className="eyebrow">Acesso corporativo</p><h1>Entrar na Licere</h1><p>Retome o acompanhamento dos seus centros de distribuição.</p></div>
+          <form className="login-form" onSubmit={submit}>
+            <label className="login-field"><span>E-mail corporativo</span><input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="nome@empresa.com.br" required data-testid="input-login-email" /></label>
+            <label className="login-field"><span className="login-field-label">Senha <button type="button" onClick={() => setFeedback('Para este protótipo, use qualquer senha.')} data-testid="button-login-forgot">Esqueceu a senha?</button></span><span className="password-wrap"><input type={showPassword ? 'text' : 'password'} autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Digite sua senha" required data-testid="input-login-password" /><button type="button" className="password-toggle" onClick={() => setShowPassword((current) => !current)} aria-label={showPassword ? 'ocultar senha' : 'mostrar senha'} data-testid="button-toggle-password">{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></span></label>
+            <label className="remember-check"><input type="checkbox" autoComplete="on" checked={remember} onChange={(e) => setRemember(e.target.checked)} data-testid="input-login-remember" /><span>Lembrar este acesso neste dispositivo</span></label>
+            <button className="login-submit" type="submit" data-testid="button-login-submit">Entrar <ArrowRight size={17} /></button>
+          </form>
+          <div className="login-divider"><span>ou continue com</span></div>
+          <button type="button" className="sso-button" onClick={() => setFeedback('SSO corporativo disponível como demonstração visual neste protótipo.')} data-testid="button-login-sso"><span className="sso-symbol"><i /><i /><i /><i /></span>Continuar com SSO corporativo</button>
+          {feedback && <div className="login-feedback" role="status" data-testid="status-login-feedback"><CheckCircle2 size={16} /><span>{feedback}</span></div>}
+          <div className="login-form-foot"><span>Sem autenticação real neste protótipo.</span><button type="button" onClick={() => setLocation('/')} data-testid="button-login-explore">Explorar sem entrar</button></div>
+        </section>
+      </section>
+    </main>
+    <footer className="login-footer"><span>© 2025 Licere</span><span>Dados locais de demonstração</span><div><button type="button" data-testid="button-login-terms">Termos de uso</button><button type="button" data-testid="button-login-privacy">Privacidade</button></div></footer>
+  </div>;
+}
 function Shell() {
   const [menuOpen, setMenuOpen] = useState(false); const [quickAdd, setQuickAdd] = useState(false); const [detail, setDetail] = useState<Licenca | Condicionante | Documento | null>(null);
   const [licencas, setLicencas] = useLocal<Licenca[]>('licere-licencas', initialLicencas); const [condicionantes, setCondicionantes] = useLocal<Condicionante[]>('licere-condicionantes', initialCondicionantes); const [documentos, setDocumentos] = useLocal<Documento[]>('licere-documentos', initialDocumentos);
@@ -161,5 +213,5 @@ function Shell() {
   return <div className="app-noise app-shell"><Sidebar open={menuOpen} onClose={() => setMenuOpen(false)} /><div className="app-main"><Topbar onMenu={() => setMenuOpen(true)} onQuickAdd={() => setQuickAdd(true)} /><Switch><Route path="/" component={() => <Overview licencas={licencas} condicionantes={condicionantes} openDetail={setDetail} />} /><Route path="/licencas" component={() => <LicencasPage items={licencas} setItems={setLicencas} openDetail={setDetail} />} /><Route path="/condicionantes" component={() => <CondicionantesPage items={condicionantes} setItems={setCondicionantes} openDetail={setDetail} />} /><Route path="/documentos" component={() => <DocumentosPage items={documentos} setItems={setDocumentos} openDetail={setDetail} />} /><Route component={NotFound} /></Switch></div>{detail && <DetailPanel item={detail} onClose={() => setDetail(null)} onSave={saveDetail} />}{quickAdd && <QuickAdd onClose={() => setQuickAdd(false)} onCreate={createQuick} />}</div>;
 }
 function Router() { const [location] = useLocation(); return <ErrorBoundary resetKey={location}><Shell /></ErrorBoundary>; }
-function App() { return <QueryClientProvider client={queryClient}><TooltipProvider><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><Router /></WouterRouter><Toaster /></TooltipProvider></QueryClientProvider>; }
+function App() { return <QueryClientProvider client={queryClient}><TooltipProvider><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><Switch><Route path="/login" component={Login} /><Route component={Router} /></Switch></WouterRouter><Toaster /></TooltipProvider></QueryClientProvider>; }
 export default App;
