@@ -167,7 +167,7 @@ button { cursor: pointer; }
 .profile small { margin-top: 2px; color: #92a298; font-size: 10px; }
 .profile > svg { color: #9caf9f; }
 .app-main { flex: 1; min-width: 0; }
-.topbar { height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 0 42px; border-bottom: 1px solid hsl(var(--border)); background: rgba(249,248,242,.72); }
+.topbar { height: 72px; display: flex; align-items: center; justify-content: flex-end; gap: 18px; padding: 0 42px; border-bottom: 1px solid hsl(var(--border)); background: rgba(249,248,242,.72); }
 .breadcrumbs { display: flex; align-items: center; gap: 9px; color: hsl(var(--muted-foreground)); font-size: 12px; }
 .breadcrumbs b { color: hsl(var(--foreground)); font-weight: 600; }
 .top-actions { display: flex; align-items: center; gap: 12px; }
