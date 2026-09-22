@@ -5627,6 +5627,10 @@ body,
 }
  
  @media (max-width: 768px) {
+  /* Fix squished form inputs in modals */
+  .quick-modal .drawer-content > div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
 
   /* Fix Grid (Tarefas, Condicionantes) */
   .condition-row {
