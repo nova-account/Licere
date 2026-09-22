@@ -5705,3 +5705,38 @@ body,
     font-size: 12px !important;
   }
 }
+@media (max-width: 768px) {
+  /* Fix Global Search */
+  .global-search {
+    width: auto !important;
+    flex: 1 1 auto !important;
+    margin: 0 8px !important;
+    padding: 0 12px !important;
+  }
+  .global-search input {
+    display: block !important;
+    width: 100% !important;
+  }
+  .global-search kbd {
+    display: none !important;
+  }
+
+  /* Fix Grid Filters */
+  .filter-bar {
+    gap: 12px !important;
+  }
+  .filter-actions {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+  }
+  .select-wrap, .filter-btn {
+    flex: 1 1 calc(50% - 4px) !important;
+    justify-content: center !important;
+    height: 40px !important;
+  }
+  .select-wrap select {
+    width: 100% !important;
+    flex: 1 !important;
+  }
+}
