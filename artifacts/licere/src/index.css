@@ -5627,34 +5627,6 @@ body,
 }
  
  @media (max-width: 768px) {
-  /* Fix Modals */
-  .quick-modal {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: 100dvh !important;
-    max-height: 100dvh !important;
-    border-radius: 0 !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    z-index: 100 !important;
-    border: none !important;
-  }
-  .detail-drawer {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: 100dvh !important;
-    max-height: 100dvh !important;
-    border-radius: 0 !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    z-index: 100 !important;
-    border: none !important;
-  }
-  .quick-modal > form > .drawer-content > div[style*="grid-template-columns"] {
-    grid-template-columns: 1fr !important;
-  }
 
   /* Fix Grid (Tarefas, Condicionantes) */
   .condition-row {
