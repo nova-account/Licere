@@ -17,9 +17,11 @@ function Router() {
 }
 
 export default function App() {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  
   return (
     <TooltipProvider>
-      <WouterRouter>
+      <WouterRouter base={basePath}>
         <Switch>
           <Route path="/login" component={LoginPage} />
           <Route path="/" component={HomePageScreen} />
