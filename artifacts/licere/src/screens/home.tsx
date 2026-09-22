@@ -23,11 +23,11 @@ export default function HomePage() {
           <div className="hero-copy">
             <p className="eyebrow">Ambiente &amp; compliance operacional</p>
             <h1>
-              Decisões ambientais com <em>lastro.</em>
+              Gestão ambiental com <em>eficiência.</em>
             </h1>
             <p>
-              Licere conecta licenças, condicionantes e evidências para que cada
-              unidade saiba o que é válido, o que vence e por quê.
+              Licere conecta licenças, condicionantes e evidências em um só lugar.
+              Dê às suas unidades controle total sobre prazos, status e obrigações operacionais.
             </p>
             <div className="hero-actions">
               <Link href="/dashboard" className="primary-btn">
@@ -40,7 +40,7 @@ export default function HomePage() {
             <div className="hero-proof">
               <span>
                 <ShieldCheck size={15} />
-                Rastro auditável
+                Histórico seguro
               </span>
               <span>
                 <Building2 size={15} />5 unidades conectadas

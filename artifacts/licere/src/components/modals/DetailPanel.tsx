@@ -394,7 +394,7 @@ export function DetailPanel({
 
           {!isCenter && (
             <div className="drawer-status">
-              <span>Status atual</span>
+              <span className="field-label">Status atual</span>
               <StatusPill status={isDocument ? getDocumentStatus((draft as Documento).validade) : (draft as any).status} />
             </div>
           )}

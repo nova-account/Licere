@@ -48,9 +48,9 @@ export default function Login() {
                   data-testid="input-login-email"
                 />
               </label>
-              <label className="login-field">
-                <span className="login-field-label">
-                  <span>Senha</span>
+              <div className="login-field">
+                <div className="login-field-label">
+                  <label htmlFor="password" style={{ display: 'block' }}>Senha</label>
                   <button
                     type="button"
                     className="forgot-password-link"
@@ -58,9 +58,10 @@ export default function Login() {
                   >
                     Esqueceu a senha?
                   </button>
-                </span>
+                </div>
                 <span className="password-wrap">
                   <input
+                    id="password"
                     type={showPassword ? 'text' : 'password'}
                     autoComplete="current-password"
                     value={password}
@@ -76,10 +77,10 @@ export default function Login() {
                     aria-label={showPassword ? 'ocultar senha' : 'mostrar senha'}
                     data-testid="button-toggle-password"
                   >
-                    {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                    {showPassword ? <Eye size={17} /> : <EyeOff size={17} />}
                   </button>
                 </span>
-              </label>
+              </div>
               <label className="remember-check">
                 <input
                   type="checkbox"
