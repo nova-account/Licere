@@ -5625,10 +5625,22 @@ body,
 .secondary-btn:hover {
   background: #f1f6f5;
 }
- 
- @media (max-width: 768px) {
+ 
+ @media (max-width: 768px) {
   /* Fix Modals */
-  .quick-modal, .detail-drawer {
+  .quick-modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 100 !important;
+    border: none !important;
+  }
+  .detail-drawer {
     width: 100% !important;
     max-width: 100% !important;
     height: 100dvh !important;
@@ -5653,7 +5665,25 @@ body,
     flex: 1 1 calc(100% - 30px);
     margin-bottom: 8px;
   }
-  .condition-responsible, .condition-deadline, .condition-recurrence, .condition-status {
+  .condition-responsible {
+    flex: 1 1 45%;
+    font-size: 11px;
+    margin-left: 30px;
+    margin-bottom: 4px;
+  }
+  .condition-deadline {
+    flex: 1 1 45%;
+    font-size: 11px;
+    margin-left: 30px;
+    margin-bottom: 4px;
+  }
+  .condition-recurrence {
+    flex: 1 1 45%;
+    font-size: 11px;
+    margin-left: 30px;
+    margin-bottom: 4px;
+  }
+  .condition-status {
     flex: 1 1 45%;
     font-size: 11px;
     margin-left: 30px;
