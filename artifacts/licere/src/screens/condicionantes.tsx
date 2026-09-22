@@ -7,6 +7,7 @@ import { StatusPill } from '@/components/ui/StatusPill';
 import { PageHeader, cn, initials } from '@/shared/ui';
 import { FilterBar, ListHeader, EmptyState, useQuerySearch } from '@/components/ui/PageControls';
 import { NovaCondicionanteModal } from '@/components/modals/NovaCondicionanteModal';
+import { ConfirmModal } from '@/components/modals/ConfirmModal';
 
 const centerName = (id: string) =>
   centros.find((center) => center.id === id)?.nome ?? id;
@@ -47,17 +48,33 @@ export default function CondicionantesPage({
       (filter === 'Todos' || i.status === filter),
   );
 
-  const toggle = (item: Condicionante) =>
+  const [confirmItem, setConfirmItem] = useState<Condicionante | null>(null);
+
+  const toggle = (item: Condicionante) => {
+    if (item.status === 'Concluída') {
+      setItems((old) =>
+        old.map((current) =>
+          current.id === item.id
+            ? { ...current, status: 'Pendente' }
+            : current,
+        ),
+      );
+    } else {
+      setConfirmItem(item);
+    }
+  };
+
+  const confirmToggle = () => {
+    if (!confirmItem) return;
     setItems((old) =>
       old.map((current) =>
-        current.id === item.id
-          ? {
-              ...current,
-              status: current.status === 'Concluída' ? 'Pendente' : 'Concluída',
-            }
+        current.id === confirmItem.id
+          ? { ...current, status: 'Concluída' }
           : current,
       ),
     );
+    setConfirmItem(null);
+  };
 
   const [addOpen, setAddOpen] = useState(false);
 
@@ -79,7 +96,7 @@ export default function CondicionantesPage({
           setSearch={setSearch}
           filter={filter}
           setFilter={setFilter}
-          options={['Pendente', 'Em análise', 'Concluída']}
+          options={['Pendente', 'Em andamento', 'Concluída']}
           placeholder="Buscar obrigação, responsável ou licença"
           onClear={() => {
             setSearch('');
@@ -161,6 +178,13 @@ export default function CondicionantesPage({
         onClose={() => setAddOpen(false)}
         onSave={(nova) => setItems((prev) => [nova, ...prev])}
         licencas={licencas}
+      />
+      <ConfirmModal
+        open={!!confirmItem}
+        title="Confirmar conclusão"
+        description={confirmItem ? `Tem certeza que deseja marcar a condicionante "${confirmItem.titulo}" como concluída?` : ''}
+        onConfirm={confirmToggle}
+        onCancel={() => setConfirmItem(null)}
       />
     </main>
   );

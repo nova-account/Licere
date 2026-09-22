@@ -46,7 +46,6 @@ export function NovoDocumentoModal({ open, onClose, onSave }: NovoDocumentoModal
       tamanho: '2.1 MB',
       atualizadoEm: new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
       validade: validade || 'Permanente',
-      status: 'Vigente',
     };
 
     onSave(novo);

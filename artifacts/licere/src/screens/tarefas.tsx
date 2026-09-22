@@ -7,6 +7,7 @@ import { StatusPill } from '@/components/ui/StatusPill';
 import { PageHeader, cn, initials } from '@/shared/ui';
 import { FilterBar, ListHeader, EmptyState, useQuerySearch } from '@/components/ui/PageControls';
 import { NovaTarefaModal } from '@/components/modals/NovaTarefaModal';
+import { ConfirmModal } from '@/components/modals/ConfirmModal';
 
 const centerName = (id: string) =>
   centros.find((center) => center.id === id)?.nome ?? id;
@@ -47,17 +48,33 @@ export default function TarefasPage({
       (filter === 'Todos' || item.status === filter),
   );
 
-  const toggle = (item: Condicionante) =>
+  const [confirmItem, setConfirmItem] = useState<Condicionante | null>(null);
+
+  const toggle = (item: Condicionante) => {
+    if (item.status === 'Concluída') {
+      setItems((old) =>
+        old.map((current) =>
+          current.id === item.id
+            ? { ...current, status: 'Pendente' }
+            : current,
+        ),
+      );
+    } else {
+      setConfirmItem(item);
+    }
+  };
+
+  const confirmToggle = () => {
+    if (!confirmItem) return;
     setItems((old) =>
       old.map((current) =>
-        current.id === item.id
-          ? {
-              ...current,
-              status: current.status === 'Concluída' ? 'Pendente' : 'Concluída',
-            }
+        current.id === confirmItem.id
+          ? { ...current, status: 'Concluída' }
           : current,
       ),
     );
+    setConfirmItem(null);
+  };
 
   const [addOpen, setAddOpen] = useState(false);
 
@@ -79,7 +96,7 @@ export default function TarefasPage({
           setSearch={setSearch}
           filter={filter}
           setFilter={setFilter}
-          options={['Pendente', 'Em análise', 'Concluída']}
+          options={['Pendente', 'Em andamento', 'Concluída']}
           placeholder="Buscar tarefa ou responsável"
           onClear={() => {
             setSearch('');
@@ -160,6 +177,13 @@ export default function TarefasPage({
         open={addOpen}
         onClose={() => setAddOpen(false)}
         onSave={(nova) => setItems((prev) => [nova, ...prev])}
+      />
+      <ConfirmModal
+        open={!!confirmItem}
+        title="Confirmar conclusão"
+        description={confirmItem ? `Tem certeza que deseja marcar a tarefa "${confirmItem.titulo}" como concluída?` : ''}
+        onConfirm={confirmToggle}
+        onCancel={() => setConfirmItem(null)}
       />
     </main>
   );

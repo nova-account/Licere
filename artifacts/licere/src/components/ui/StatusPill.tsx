@@ -11,7 +11,8 @@ export function StatusPill({ status }: { status: Status | string }) {
       : status === 'A vencer'
         ? 'orange'
         : status === 'Em análise' ||
-          status === 'Em expansão'
+          status === 'Em expansão' ||
+          status === 'Em andamento'
         ? 'warn'
         : 'bad';
 

@@ -12,16 +12,11 @@ import {
 import type { Centro, Condicionante, DetailItem, Documento, Licenca } from '@/shared/types';
 import { centros } from '@/shared/data';
 import { StatusPill } from '@/components/ui/StatusPill';
+import { getDocumentStatus, formatDateBr } from '@/shared/utils';
 
 const centerName = (id: string) =>
   centros.find((center) => center.id === id)?.nome ?? id;
 
-const formatDate = (value: string) => {
-  if (!value) return '';
-  const [y, m, d] = value.split('-');
-  if (!d) return value;
-  return `${d}/${m}/${y}`;
-};
 
 function RelationshipLink({ label, onClick }: { label: string; onClick: () => void }) {
   return (
@@ -141,7 +136,7 @@ export function DetailPanel({
               </span>
               <span>
                 <b>{draft.orgao}</b>
-                <small>Emissão {formatDate(draft.emissao)}</small>
+                <small>Emissão {formatDateBr(draft.emissao)}</small>
               </span>
               <StatusPill status={draft.status} />
             </div>
@@ -209,7 +204,7 @@ export function DetailPanel({
                 </div>
                 <div>
                   <span>Vencimento</span>
-                  <b>{formatDate((draft as Licenca).vencimento)}</b>
+                  <b>{formatDateBr((draft as Licenca).vencimento)}</b>
                 </div>
                 <div>
                   <span>Criticidade</span>
@@ -229,7 +224,7 @@ export function DetailPanel({
                 </div>
                 <div>
                   <span>Prazo</span>
-                  <b>{formatDate((draft as Condicionante).prazo)}</b>
+                  <b>{formatDateBr((draft as Condicionante).prazo)}</b>
                 </div>
                 <div>
                   <span>Recorrência</span>
@@ -249,7 +244,7 @@ export function DetailPanel({
                 </div>
                 <div>
                   <span>Validade</span>
-                  <b>{(draft as Documento).validade}</b>
+                  <b>{formatDateBr((draft as Documento).validade)}</b>
                 </div>
                 <div>
                   <span>Tamanho</span>
@@ -400,7 +395,7 @@ export function DetailPanel({
           {!isCenter && (
             <div className="drawer-status">
               <span>Status atual</span>
-              <StatusPill status={draft.status} />
+              <StatusPill status={isDocument ? getDocumentStatus((draft as Documento).validade) : (draft as any).status} />
             </div>
           )}
         </div>

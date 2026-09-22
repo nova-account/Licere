@@ -7,6 +7,7 @@ import { StatusPill } from '@/components/ui/StatusPill';
 import { PageHeader } from '@/shared/ui';
 import { FilterBar, ListHeader, EmptyState, useQuerySearch } from '@/components/ui/PageControls';
 import { NovoDocumentoModal } from '@/components/modals/NovoDocumentoModal';
+import { getDocumentStatus, formatDateBr } from '@/shared/utils';
 
 const centerName = (id: string) =>
   centros.find((center) => center.id === id)?.nome ?? id;
@@ -30,7 +31,7 @@ export default function DocumentosPage({
       `${i.nome} ${i.categoria} ${centerName(i.centroId)}`
         .toLowerCase()
         .includes(search.toLowerCase()) &&
-      (filter === 'Todos' || i.categoria === filter || i.status === filter),
+      (filter === 'Todos' || i.categoria === filter || getDocumentStatus(i.validade) === filter),
   );
 
   const [addOpen, setAddOpen] = useState(false);
@@ -73,7 +74,9 @@ export default function DocumentosPage({
           label="documentos encontrados"
         />
         <div className="document-grid">
-          {filtered.map((item) => (
+          {filtered.map((item) => {
+            const status = getDocumentStatus(item.validade);
+            return (
             <button
               className="document-card"
               key={item.id}
@@ -89,16 +92,17 @@ export default function DocumentosPage({
                   {centerName(item.centroId)} · {item.categoria}
                 </small>
                 <span className="document-meta">
-                  <span>Validade {item.validade}</span>
+                  <span>Validade {formatDateBr(item.validade)}</span>
                   <span>{item.tamanho}</span>
                 </span>
               </span>
               <span className="document-status">
-                <StatusPill status={item.status} />
+                <StatusPill status={status} />
                 <MoreHorizontal size={17} />
               </span>
             </button>
-          ))}
+            );
+          })}
         </div>
         {filtered.length === 0 && (
           <EmptyState

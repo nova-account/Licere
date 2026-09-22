@@ -3,6 +3,7 @@ export type Status =
   | 'A vencer'
   | 'Vencida'
   | 'Em análise'
+  | 'Em andamento'
   | 'Concluída'
   | 'Pendente'
   | 'Vigente'
@@ -48,7 +49,6 @@ export type Documento = {
   centroId: string;
   atualizadoEm: string;
   validade: string;
-  status: Status;
   tamanho: string;
   licencaId?: string;
   condicionanteId?: string;
