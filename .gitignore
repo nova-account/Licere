@@ -47,5 +47,16 @@ Thumbs.db
 .cache/
 .local/
 
-.next
-out
+.next/
+**/.next/
+out/
+**/out/
+
+# Secrets and local env
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+service-account*.json
