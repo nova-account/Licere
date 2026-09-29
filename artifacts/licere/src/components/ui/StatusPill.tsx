@@ -8,18 +8,20 @@ export function StatusPill({ status }: { status: Status | string }) {
     status === 'Concluída' ||
     status === 'Operando'
       ? 'good'
-      : status === 'A vencer'
-        ? 'orange'
-        : status === 'Em análise' ||
-          status === 'Em expansão' ||
-          status === 'Em andamento'
-        ? 'warn'
-        : 'bad';
+      : status === 'Em análise' ||
+        status === 'Em expansão' ||
+        status === 'Em andamento'
+        ? 'notice'
+        : status === 'Pendente'
+          ? 'warn'
+          : status === 'A vencer'
+            ? 'orange'
+            : 'bad';
 
   return (
-    <span className={`pill pill-${tone}`}>
+    <span className={`pill pill-${tone}`} role="status" title={status}>
       <i aria-hidden="true" />
-      {status}
+      <span>{status}</span>
     </span>
   );
 }
