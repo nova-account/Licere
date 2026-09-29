@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { AppDataProvider } from '@/lib/AppDataContext';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { Toaster } from '@/components/ui/toaster';
 import '../index.css';
 
 export const metadata: Metadata = {
@@ -12,7 +15,14 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body suppressHydrationWarning>
+        <AppDataProvider>
+          <TooltipProvider>
+            {children}
+            <Toaster />
+          </TooltipProvider>
+        </AppDataProvider>
+      </body>
     </html>
   );
 }

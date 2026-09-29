@@ -1,30 +1,27 @@
+'use client';
 import React, { useState } from 'react';
-import { useLocation } from 'wouter';
+import { useRouter } from 'next/navigation';
 import { FileText, MoreHorizontal } from 'lucide-react';
 import type { DetailItem, Documento } from '@/shared/types';
 import { centros } from '@/shared/data';
-import { StatusPill } from '@/components/ui/StatusPill';
+import { StatusPill } from '@/components/shared/status-pill';
 import { PageHeader } from '@/shared/ui';
-import { FilterBar, ListHeader, EmptyState, useQuerySearch } from '@/components/ui/PageControls';
+import { FilterBar, ListHeader, EmptyState, useQuerySearch } from '@/components/layout/list-controls';
 import { NovoDocumentoModal } from '@/components/modals/NovoDocumentoModal';
 import { getDocumentStatus, formatDateBr } from '@/shared/utils';
 
 const centerName = (id: string) =>
   centros.find((center) => center.id === id)?.nome ?? id;
 
-export default function DocumentosPage({
-  items,
-  setItems,
-  openDetail,
-}: {
-  items: Documento[];
-  setItems: (v: Documento[] | ((old: Documento[]) => Documento[])) => void;
-  openDetail: (item: DetailItem) => void;
-}) {
+import { useAppData } from '@/lib/AppDataContext';
+
+export default function DocumentosPage() {
+  const { documentos: items, setDocumentos: setItems, setDetail: openDetail } = useAppData();
+
   const querySearch = useQuerySearch();
   const [search, setSearch] = useState(querySearch);
   const [filter, setFilter] = useState('Todos');
-  const [, setLocation] = useLocation();
+  const router = useRouter();
 
   const filtered = items.filter(
     (i) =>

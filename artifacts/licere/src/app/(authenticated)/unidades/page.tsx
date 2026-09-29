@@ -1,17 +1,18 @@
+'use client';
 import React, { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import type { Centro, DetailItem } from '@/shared/types';
 import { centros } from '@/shared/data';
-import { StatusPill } from '@/components/ui/StatusPill';
+import { StatusPill } from '@/components/shared/status-pill';
 import { PageHeader, initials, useLocal } from '@/shared/ui';
-import { FilterBar, ListHeader, EmptyState, useQuerySearch } from '@/components/ui/PageControls';
+import { FilterBar, ListHeader, EmptyState, useQuerySearch } from '@/components/layout/list-controls';
 import { NovaUnidadeModal } from '@/components/modals/NovaUnidadeModal';
 
-export default function UnidadesPage({
-  openDetail,
-}: {
-  openDetail: (item: DetailItem) => void;
-}) {
+import { useAppData } from '@/lib/AppDataContext';
+
+export default function UnidadesPage() {
+  const { setDetail: openDetail } = useAppData();
+
   const [centrosList, setCentrosList] = useLocal<Centro[]>('licere_centros', centros);
   const querySearch = useQuerySearch();
   const [search, setSearch] = useState(querySearch);

@@ -8,7 +8,8 @@
     "node_modules",
     "build",
     "dist",
-    "**/*.test.ts"
+    "**/*.test.ts",
+    "src/components/ui/unused/**"
   ],
   "compilerOptions": {
     "noEmit": true,

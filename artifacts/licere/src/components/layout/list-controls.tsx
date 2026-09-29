@@ -1,11 +1,11 @@
 import React from 'react';
-import { useLocation } from 'wouter';
+import { useSearchParams } from 'next/navigation';
 import { ChevronDown, Filter, ListFilter, Plus, Search, X } from 'lucide-react';
 import { Mark } from '@/shared/ui';
 
 export function useQuerySearch() {
-  const [location] = useLocation();
-  return new URLSearchParams(location.split('?')[1] ?? '').get('busca') ?? '';
+  const searchParams = useSearchParams();
+  return searchParams.get('busca') ?? '';
 }
 
 export function FilterBar({

@@ -1,18 +1,20 @@
+'use client';
 import { type FormEvent, useState } from 'react';
 import { ArrowRight, Eye, EyeOff } from 'lucide-react';
-import { Link, useLocation } from 'wouter';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Mark } from '@/shared/ui';
 
 import { ForgotPasswordModal } from '@/components/modals/ForgotPasswordModal';
 
 export default function Login() {
-  const [, setLocation] = useLocation();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
   const [forgotOpen, setForgotOpen] = useState(false);
-  const submit = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); setLocation('/dashboard'); };
+  const submit = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); router.push('/dashboard'); };
   return (
     <div className="login-page">
       <header className="login-header">
@@ -105,7 +107,7 @@ export default function Login() {
             <button
               type="button"
               className="sso-button"
-              onClick={() => setLocation('/dashboard')}
+              onClick={() => router.push('/dashboard')}
               data-testid="button-login-sso"
             >
               <span className="sso-symbol">
@@ -116,7 +118,7 @@ export default function Login() {
             <div className="login-form-foot">
               <button
                 type="button"
-                onClick={() => setLocation('/dashboard')}
+                onClick={() => router.push('/dashboard')}
                 data-testid="button-login-explore"
               >
                 Explorar workspace de demonstração →

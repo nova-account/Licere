@@ -1,12 +1,13 @@
+'use client';
 import React, { useState } from 'react';
-import { useLocation } from 'wouter';
+import { useRouter } from 'next/navigation';
 import { CalendarDays, Check, ChevronRight } from 'lucide-react';
 import type { Condicionante, DetailItem, Licenca } from '@/shared/types';
 import { centros, initialLicencas } from '@/shared/data';
-import { StatusPill } from '@/components/ui/StatusPill';
+import { StatusPill } from '@/components/shared/status-pill';
 import { PageHeader, cn, initials } from '@/shared/ui';
-import { FilterBar, ListHeader, EmptyState, useQuerySearch } from '@/components/ui/PageControls';
-import { NovaCondicionanteModal } from '@/components/modals/NovaCondicionanteModal';
+import { FilterBar, ListHeader, EmptyState, useQuerySearch } from '@/components/layout/list-controls';
+import { NovaTarefaModal } from '@/components/modals/NovaTarefaModal';
 import { ConfirmModal } from '@/components/modals/ConfirmModal';
 
 const centerName = (id: string) =>
@@ -22,30 +23,22 @@ const formatDate = (value: string) => {
   return `${d}/${m}/${y}`;
 };
 
-export default function CondicionantesPage({
-  items,
-  setItems,
-  openDetail,
-  licencas,
-}: {
-  items: Condicionante[];
-  setItems: (
-    v: Condicionante[] | ((old: Condicionante[]) => Condicionante[]),
-  ) => void;
-  openDetail: (item: DetailItem) => void;
-  licencas: Licenca[];
-}) {
+import { useAppData } from '@/lib/AppDataContext';
+
+export default function TarefasPage() {
+  const { condicionantes: items, setCondicionantes: setItems, licencas, setDetail: openDetail } = useAppData();
+
   const querySearch = useQuerySearch();
   const [search, setSearch] = useState(querySearch);
   const [filter, setFilter] = useState('Todos');
-  const [, setLocation] = useLocation();
+  const router = useRouter();
 
   const filtered = items.filter(
-    (i) =>
-      `${i.titulo} ${i.responsavel} ${centerName(i.centroId)} ${licenseName(i.licencaId, licencas)}`
+    (item) =>
+      `${item.titulo} ${item.responsavel} ${centerName(item.centroId)}`
         .toLowerCase()
         .includes(search.toLowerCase()) &&
-      (filter === 'Todos' || i.status === filter),
+      (filter === 'Todos' || item.status === filter),
   );
 
   const [confirmItem, setConfirmItem] = useState<Condicionante | null>(null);
@@ -86,18 +79,18 @@ export default function CondicionantesPage({
     <main className="content">
       <PageHeader
         eyebrow="Rotina de conformidade"
-        title="Condicionantes"
+        title="Tarefas"
         action={add}
-        actionLabel="Nova condicionante"
+        actionLabel="Nova tarefa"
       />
-      <div className="list-card animate-rise">
+      <div className="list-card tasks-list-card animate-rise">
         <FilterBar
           search={search}
           setSearch={setSearch}
           filter={filter}
           setFilter={setFilter}
           options={['Pendente', 'Em andamento', 'Concluída']}
-          placeholder="Buscar obrigação, responsável ou licença"
+          placeholder="Buscar tarefa ou responsável"
           onClear={() => {
             setSearch('');
             setFilter('Todos');
@@ -105,14 +98,14 @@ export default function CondicionantesPage({
         />
         <ListHeader
           count={filtered.length}
-          label="obrigações monitoradas"
+          label="tarefas monitoradas"
         />
         <div className="condition-list">
           {filtered.map((item) => (
             <div
               className="condition-row"
               key={item.id}
-              data-testid={`row-condicionante-${item.id}`}
+              data-testid={`row-tarefa-${item.id}`}
             >
               <button
                 className={cn(
@@ -120,7 +113,7 @@ export default function CondicionantesPage({
                   item.status === 'Concluída' && 'check-box-done',
                 )}
                 onClick={() => toggle(item)}
-                aria-label={`marcar ${item.titulo}`}
+                aria-label={`concluir ${item.titulo}`}
               >
                 {item.status === 'Concluída' && <Check size={14} />}
               </button>
@@ -164,8 +157,8 @@ export default function CondicionantesPage({
         </div>
         {filtered.length === 0 && (
           <EmptyState
-            title="Tudo limpo por aqui"
-            description="Nenhuma condicionante encontrada."
+            title="Nenhuma tarefa encontrada"
+            description="Ajuste a busca ou o filtro."
             onClear={() => {
               setSearch('');
               setFilter('Todos');
@@ -173,16 +166,15 @@ export default function CondicionantesPage({
           />
         )}
       </div>
-      <NovaCondicionanteModal
+      <NovaTarefaModal
         open={addOpen}
         onClose={() => setAddOpen(false)}
         onSave={(nova) => setItems((prev) => [nova, ...prev])}
-        licencas={licencas}
       />
       <ConfirmModal
         open={!!confirmItem}
         title="Confirmar conclusão"
-        description={confirmItem ? `Tem certeza que deseja marcar a condicionante "${confirmItem.titulo}" como concluída?` : ''}
+        description={confirmItem ? `Tem certeza que deseja marcar a tarefa "${confirmItem.titulo}" como concluída?` : ''}
         onConfirm={confirmToggle}
         onCancel={() => setConfirmItem(null)}
       />

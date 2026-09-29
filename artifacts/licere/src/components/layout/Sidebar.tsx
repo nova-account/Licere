@@ -1,5 +1,6 @@
 import React from 'react';
-import { Link, useLocation } from 'wouter';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   Building2,
   ChevronDown,
@@ -18,7 +19,7 @@ import { Mark, cn } from '@/shared/ui';
 import { centros, initialCondicionantes } from '@/shared/data';
 
 export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [location] = useLocation();
+  const pathname = usePathname();
   const nav = [
     { href: '/dashboard', label: 'Visão geral', icon: LayoutDashboard },
     {
@@ -73,7 +74,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
             data-testid={`link-${label.toLowerCase().replace(/\s+/g, '-')}`}
             className={cn(
               'nav-item',
-              (location === href || location.startsWith(`${href}?`)) && 'nav-item-active',
+              (pathname === href || pathname.startsWith(`${href}?`)) && 'nav-item-active',
             )}
           >
             <NavIcon size={18} strokeWidth={1.8} />
@@ -93,7 +94,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
             data-testid={`link-${label.toLowerCase().replace(/\s+/g, '-')}`}
             className={cn(
               'nav-item',
-              location.startsWith(href) && 'nav-item-active',
+              pathname.startsWith(href) && 'nav-item-active',
             )}
           >
             <NavIcon size={16} strokeWidth={1.8} />

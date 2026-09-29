@@ -1,5 +1,6 @@
+'use client';
 import { ArrowRight, BookOpen, CircleHelp, FileCheck2, ShieldCheck } from 'lucide-react';
-import { Link } from 'wouter';
+import Link from 'next/link';
 import { PageHeader } from '@/shared/ui';
 
 const topics = [

@@ -28,13 +28,24 @@ export function initials(name: string) {
 }
 
 export function useLocal<T>(key: string, fallback: T): [T, (value: T | ((old: T) => T)) => void] {
-  const [value, setValue] = React.useState<T>(() => {
-    try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) as T : fallback; } catch { return fallback; }
-  });
+  const [value, setValue] = React.useState<T>(fallback);
+
+  React.useEffect(() => {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        setValue(JSON.parse(raw) as T);
+      }
+    } catch { }
+  }, [key]);
+
   const save = (next: T | ((old: T) => T)) => setValue((old) => {
     const resolved = typeof next === 'function' ? (next as (old: T) => T)(old) : next;
-    localStorage.setItem(key, JSON.stringify(resolved));
+    try {
+      localStorage.setItem(key, JSON.stringify(resolved));
+    } catch { }
     return resolved;
   });
+
   return [value, save];
 }

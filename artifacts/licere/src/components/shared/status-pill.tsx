@@ -4,9 +4,9 @@ import type { Status } from '@/shared/types';
 export function StatusPill({ status }: { status: Status | string }) {
   const tone =
     status === 'Regular' ||
-    status === 'Vigente' ||
-    status === 'Concluída' ||
-    status === 'Operando'
+      status === 'Vigente' ||
+      status === 'Concluída' ||
+      status === 'Operando'
       ? 'good'
       : status === 'Em análise' ||
         status === 'Em expansão' ||

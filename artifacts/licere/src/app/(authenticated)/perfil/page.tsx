@@ -1,3 +1,4 @@
+'use client';
 import { type FormEvent, useEffect, useState } from 'react';
 import { Check, Settings2, ShieldCheck } from 'lucide-react';
 import { PageHeader, initials, useLocal } from '@/shared/ui';

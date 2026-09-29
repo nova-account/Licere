@@ -1,11 +1,12 @@
+'use client';
 import React, { useState, useMemo } from 'react';
-import { useLocation } from 'wouter';
+import { useRouter } from 'next/navigation';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import type { DetailItem, Licenca } from '@/shared/types';
 import { centros } from '@/shared/data';
-import { StatusPill } from '@/components/ui/StatusPill';
+import { StatusPill } from '@/components/shared/status-pill';
 import { PageHeader, cn } from '@/shared/ui';
-import { FilterBar, ListHeader, EmptyState, useQuerySearch } from '@/components/ui/PageControls';
+import { FilterBar, ListHeader, EmptyState, useQuerySearch } from '@/components/layout/list-controls';
 import { NovaLicencaModal } from '@/components/modals/NovaLicencaModal';
 
 const centerName = (id: string) =>
@@ -18,20 +19,16 @@ const formatDate = (value: string) => {
   return `${d}/${m}/${y}`;
 };
 
-export default function LicencasPage({
-  items,
-  setItems,
-  openDetail,
-}: {
-  items: Licenca[];
-  setItems: (v: Licenca[] | ((old: Licenca[]) => Licenca[])) => void;
-  openDetail: (item: DetailItem) => void;
-}) {
+import { useAppData } from '@/lib/AppDataContext';
+
+export default function LicencasPage() {
+  const { licencas: items, setLicencas: setItems, setDetail: openDetail } = useAppData();
+
   const querySearch = useQuerySearch();
   const [search, setSearch] = useState(querySearch);
   const [filter, setFilter] = useState('Todos');
   const [sort, setSort] = useState<'vencimento' | 'centro'>('vencimento');
-  const [, setLocation] = useLocation();
+  const router = useRouter();
 
   const filtered = useMemo(
     () =>

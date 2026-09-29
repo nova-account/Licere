@@ -3892,25 +3892,29 @@ body,
 }
 
 .notice-banner {
-  border-color: #d1e0e3;
-  background: #edf4f5;
+  border-color: #ebcfbd;
+  background: #fbede5;
 }
 
 .notice-icon {
-  color: #3d7185;
-  background: #d6e7ec;
+  color: #a96343;
+  background: transparent;
 }
 
 .notice-banner b {
-  color: #285365;
+  color: #78472f;
 }
 
 .notice-banner span {
-  color: #68818a;
+  color: #976c55;
 }
 
 .notice-banner a {
-  color: #286079;
+  color: #925537;
+}
+
+.notice-banner > button {
+  color: #a96343;
 }
 
 .dashboard-grid,
@@ -5097,7 +5101,7 @@ body,
   border-radius: 10px;
   background: #ffffff;
   border: 1px solid rgba(16, 42, 34, 0.06);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .preview-label {
@@ -5792,7 +5796,6 @@ body,
   }
 
   .public-header,
-  .hero-public,
   .public-strip,
   .public-service,
   .public-footer {
@@ -5807,27 +5810,13 @@ body,
     display: none;
   }
 
-  .hero-public {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 42px;
-    min-height: auto;
-    padding: 65px 0 62px;
-  }
 
-  .hero-copy h1 {
-    font-size: clamp(45px, 14vw, 70px);
-  }
 
-  .hero-copy>p:not(.eyebrow) {
-    font-size: 14px;
-  }
 
-  .hero-orbit {
-    align-self: center;
-    width: min(420px, 94vw);
-  }
+
+
+
+
 
   .public-strip {
     grid-template-columns: 1fr;
@@ -6181,30 +6170,19 @@ body,
   background-color: #f8f9fa !important;
 }
 
-.public-login,
-.hero-orbit,
-.orbit-center,
-.orbit-node {
+.public-login {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
-.public-login,
-.orbit-center,
-.orbit-node {
+.public-login {
   background: #ffffff !important;
   border-color: #e5ebe7 !important;
 }
 
-.hero-orbit {
-  background: transparent !important;
-  box-shadow: none !important;
-}
 
-.orbit-center .licere-mark {
-  width: 52px !important;
-  height: 52px !important;
-}
+
+
 
 .modal-backdrop,
 .drawer-backdrop {
@@ -6212,19 +6190,11 @@ body,
   -webkit-backdrop-filter: none;
 }
 
-.orbit-center {
-  background: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-}
 
-.orbit-center .licere-mark {
-  color: #176044 !important;
-}
 
-.orbit-center b {
-  color: #176044 !important;
-}
+
+
+
 
 .relationship-title {
   margin-top: 20px;

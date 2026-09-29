@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import {
   AlertTriangle,
@@ -15,7 +16,7 @@ import {
   ShieldCheck,
   Zap,
 } from 'lucide-react';
-import { Link } from 'wouter';
+import Link from 'next/link';
 import { Mark } from '@/shared/ui';
 
 export default function HomePage() {
@@ -139,7 +140,9 @@ export default function HomePage() {
                     <b>Protocolo Preventivo Necessário</b>
                     <span>Licença CETESB 48001234 (CD Cajamar) vence em 154 dias. Iniciar renovação com 120 dias de antecedência.</span>
                   </div>
-                  <span className="pill pill-orange"><i />A vencer</span>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', color: '#925537', fontSize: '11px', fontWeight: 700 }}>
+                    Abrir tarefa <ChevronRight size={15} />
+                  </div>
                 </div>
 
                 {/* Mock Live Table Preview */}

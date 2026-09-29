@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useLocation, Link } from 'wouter';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Bell, Menu, Search, Plus } from 'lucide-react';
 
 export function Topbar({
@@ -9,7 +10,7 @@ export function Topbar({
   onMenu: () => void;
   onQuickAdd?: () => void;
 }) {
-  const [, setLocation] = useLocation();
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const [notificationOpen, setNotificationOpen] = useState(false);
 
@@ -25,7 +26,7 @@ export function Topbar({
           : normalized.includes('unidade') || normalized.includes('cd ')
             ? '/unidades'
             : '/licencas';
-    setLocation(`${path}?busca=${encodeURIComponent(value)}`);
+    router.push(`${path}?busca=${encodeURIComponent(value)}`);
   };
 
   return (
