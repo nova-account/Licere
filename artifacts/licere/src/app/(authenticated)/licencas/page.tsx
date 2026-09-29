@@ -1,5 +1,4 @@
 'use client';
-export const dynamic = 'force-dynamic';
 import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronDown, ChevronRight } from 'lucide-react';

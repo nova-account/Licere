@@ -1,11 +1,10 @@
 import React from 'react';
-import { useSearchParams } from 'next/navigation';
 import { ChevronDown, Filter, ListFilter, Plus, Search, X } from 'lucide-react';
 import { Mark } from '@/shared/ui';
 
+/** Retorna o valor inicial de busca. No export estático, sempre retorna vazio. */
 export function useQuerySearch() {
-  const searchParams = useSearchParams();
-  return searchParams.get('busca') ?? '';
+  return '';
 }
 
 export function FilterBar({
