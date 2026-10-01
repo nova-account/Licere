@@ -3,7 +3,6 @@
 > **Frontend corporativo centralizado para acompanhamento de unidades, documentos, tarefas e indicadores de conformidade ambiental e regulatória.**
 
 - **Demonstração online (Deploy):** [https://nova-account.github.io/Licere/](https://nova-account.github.io/Licere/)
-- **Repositório oficial:** [https://github.com/nova-account/Licere](https://github.com/nova-account/Licere)
 
 ---
 
@@ -139,10 +138,3 @@ npm test
    - Acesse [http://localhost:5173](http://localhost:5173) ou [http://localhost:3000](http://localhost:3000)
    - Na tela de login, utilize qualquer e-mail corporativo válido e senha com no mínimo 6 caracteres, ou clique em **"Explorar workspace de demonstração"** para entrar instantaneamente com credenciais pré-configuradas.
 
----
-
-## 7. Critérios de Avaliação Atendidos
-
-- **Desempenho Técnico (60%):** Arquitetura limpa, componentes reutilizáveis, tipagem completa em TypeScript sem `any`, design system consistente, responsividade para todos os formatos de tela e tratamento de loading/erros.
-- **Processos e Organização (10%):** Repositório versionado com commits estruturados, documentação completa em português formal, ausência de emojis e cobertura de testes unitários.
-- **Apresentação Final (30%):** Interface fluida, moderna, dados mockados dinâmicos que cobrem todos os estados solicitados na avaliação e link de demonstração funcional online.
