@@ -1,7 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { X, Save, ListTodo } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { X, Save, ListTodo, AlertCircle } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import type { Condicionante } from '@/shared/types';
-import { centros, initialLicencas } from '@/shared/data';
+import { useAppData } from '@/lib/AppDataContext';
+
+const novaTarefaSchema = z.object({
+  titulo: z.string().min(3, 'O título da tarefa deve ter pelo menos 3 caracteres.'),
+  centroId: z.string().min(1, 'Selecione a unidade responsável.'),
+  responsavel: z.string().min(3, 'O responsável operacional é obrigatório.'),
+  prazo: z.string().min(1, 'A data limite é obrigatória.'),
+  recorrencia: z.string(),
+  status: z.enum(['Pendente', 'Em andamento', 'Concluída']),
+});
+
+type NovaTarefaFormData = z.infer<typeof novaTarefaSchema>;
 
 interface NovaTarefaModalProps {
   open: boolean;
@@ -10,12 +24,34 @@ interface NovaTarefaModalProps {
 }
 
 export function NovaTarefaModal({ open, onClose, onSave }: NovaTarefaModalProps) {
-  const [titulo, setTitulo] = useState('');
-  const [centroId, setCentroId] = useState(centros[0]?.id || 'cd-sp');
-  const [responsavel, setResponsavel] = useState('Marina Azevedo');
-  const [prazo, setPrazo] = useState('');
-  const [recorrencia, setRecorrencia] = useState('Semanal');
-  const [status, setStatus] = useState<Condicionante['status']>('Pendente');
+  const { centros, licencas } = useAppData();
+  const activeCentros = centros.filter((c) => c.status === 'Ativa');
+  const defaultCentro = activeCentros[0] || centros[0];
+  const [inactiveError, setInactiveError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<NovaTarefaFormData>({
+    resolver: zodResolver(novaTarefaSchema),
+    defaultValues: {
+      titulo: '',
+      centroId: defaultCentro?.id || '',
+      responsavel: 'Marina Azevedo',
+      prazo: '',
+      recorrencia: 'Semanal',
+      status: 'Pendente',
+    },
+  });
+
+  useEffect(() => {
+    if (defaultCentro) {
+      setValue('centroId', defaultCentro.id);
+    }
+  }, [defaultCentro, setValue]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -26,31 +62,39 @@ export function NovaTarefaModal({ open, onClose, onSave }: NovaTarefaModalProps)
       window.addEventListener('keydown', handleKeyDown);
     } else {
       document.body.style.overflow = '';
+      reset();
+      setInactiveError(null);
     }
     return () => {
       document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [open, onClose]);
+  }, [open, onClose, reset]);
 
   if (!open) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!titulo.trim() || !prazo) return;
+  const onSubmit = (data: NovaTarefaFormData) => {
+    setInactiveError(null);
+
+    const selectedCentro = centros.find((c) => c.id === data.centroId);
+    if (selectedCentro?.status === 'Inativa') {
+      setInactiveError('Unidades inativas não podem receber novas tarefas operacionais.');
+      return;
+    }
 
     const nova: Condicionante = {
       id: `task-${Date.now()}`,
-      titulo,
-      centroId,
-      licencaId: initialLicencas.find((l) => l.centroId === centroId)?.id || initialLicencas[0].id,
-      responsavel,
-      prazo,
-      recorrencia,
-      status,
+      titulo: data.titulo,
+      centroId: data.centroId,
+      licencaId: licencas.find((l) => l.centroId === data.centroId)?.id || licencas[0]?.id || 'lic-1',
+      responsavel: data.responsavel,
+      prazo: data.prazo,
+      recorrencia: data.recorrencia,
+      status: data.status,
     };
 
     onSave(nova);
+    reset();
     onClose();
   };
 
@@ -72,32 +116,55 @@ export function NovaTarefaModal({ open, onClose, onSave }: NovaTarefaModalProps)
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <div className="drawer-content" style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {inactiveError && (
+              <div style={{ padding: '10px 12px', background: '#fdeded', border: '1px solid #f5c2c7', borderRadius: '6px', color: '#b02a37', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <AlertCircle size={15} />
+                <span>{inactiveError}</span>
+              </div>
+            )}
+
             <label className="field-label" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <span style={{ fontSize: '11px', fontWeight: 600, color: '#688275', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Título da Tarefa</span>
               <input
                 type="text"
                 placeholder="Ex: Inspecionar ponto de descarte de efluentes"
-                value={titulo}
-                onChange={(e) => setTitulo(e.target.value)}
-                required
-                style={{ height: '38px', padding: '0 12px', borderRadius: '8px', border: '1px solid #dbe2dd', background: '#fff', fontSize: '13px' }}
+                {...register('titulo')}
+                style={{
+                  height: '38px',
+                  padding: '0 12px',
+                  borderRadius: '8px',
+                  border: errors.titulo ? '1px solid #b02a37' : '1px solid #dbe2dd',
+                  background: errors.titulo ? '#fffbfb' : '#fff',
+                  fontSize: '13px',
+                }}
               />
+              {errors.titulo && (
+                <span style={{ color: '#b02a37', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <AlertCircle size={12} /> {errors.titulo.message}
+                </span>
+              )}
             </label>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
               <label className="field-label" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 600, color: '#688275', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Unidade</span>
+                <span style={{ fontSize: '11px', fontWeight: 600, color: '#688275', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Unidade (Apenas ativas)</span>
                 <select
-                  value={centroId}
-                  onChange={(e) => setCentroId(e.target.value)}
+                  {...register('centroId')}
                   style={{ height: '38px', padding: '0 10px', borderRadius: '8px', border: '1px solid #dbe2dd', background: '#fff', fontSize: '13px' }}
                 >
                   {centros.map((c) => (
-                    <option key={c.id} value={c.id}>{c.nome}</option>
+                    <option key={c.id} value={c.id} disabled={c.status === 'Inativa'}>
+                      {c.nome} {c.status === 'Inativa' ? '(Inativa - Bloqueada)' : ''}
+                    </option>
                   ))}
                 </select>
+                {errors.centroId && (
+                  <span style={{ color: '#b02a37', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <AlertCircle size={12} /> {errors.centroId.message}
+                  </span>
+                )}
               </label>
 
               <label className="field-label" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -105,11 +172,21 @@ export function NovaTarefaModal({ open, onClose, onSave }: NovaTarefaModalProps)
                 <input
                   type="text"
                   placeholder="Nome do responsável"
-                  value={responsavel}
-                  onChange={(e) => setResponsavel(e.target.value)}
-                  required
-                  style={{ height: '38px', padding: '0 12px', borderRadius: '8px', border: '1px solid #dbe2dd', background: '#fff', fontSize: '13px' }}
+                  {...register('responsavel')}
+                  style={{
+                    height: '38px',
+                    padding: '0 12px',
+                    borderRadius: '8px',
+                    border: errors.responsavel ? '1px solid #b02a37' : '1px solid #dbe2dd',
+                    background: errors.responsavel ? '#fffbfb' : '#fff',
+                    fontSize: '13px',
+                  }}
                 />
+                {errors.responsavel && (
+                  <span style={{ color: '#b02a37', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <AlertCircle size={12} /> {errors.responsavel.message}
+                  </span>
+                )}
               </label>
             </div>
 
@@ -118,18 +195,27 @@ export function NovaTarefaModal({ open, onClose, onSave }: NovaTarefaModalProps)
                 <span style={{ fontSize: '11px', fontWeight: 600, color: '#688275', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Data Limite</span>
                 <input
                   type="date"
-                  value={prazo}
-                  onChange={(e) => setPrazo(e.target.value)}
-                  required
-                  style={{ height: '38px', padding: '0 12px', borderRadius: '8px', border: '1px solid #dbe2dd', background: '#fff', fontSize: '13px' }}
+                  {...register('prazo')}
+                  style={{
+                    height: '38px',
+                    padding: '0 12px',
+                    borderRadius: '8px',
+                    border: errors.prazo ? '1px solid #b02a37' : '1px solid #dbe2dd',
+                    background: errors.prazo ? '#fffbfb' : '#fff',
+                    fontSize: '13px',
+                  }}
                 />
+                {errors.prazo && (
+                  <span style={{ color: '#b02a37', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <AlertCircle size={12} /> {errors.prazo.message}
+                  </span>
+                )}
               </label>
 
               <label className="field-label" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <span style={{ fontSize: '11px', fontWeight: 600, color: '#688275', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Periodicidade</span>
                 <select
-                  value={recorrencia}
-                  onChange={(e) => setRecorrencia(e.target.value)}
+                  {...register('recorrencia')}
                   style={{ height: '38px', padding: '0 10px', borderRadius: '8px', border: '1px solid #dbe2dd', background: '#fff', fontSize: '13px' }}
                 >
                   <option value="Única">Pontual (Única)</option>

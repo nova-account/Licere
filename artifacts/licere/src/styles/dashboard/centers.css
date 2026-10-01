@@ -1,0 +1,81 @@
+/* ── Centers table ── */
+.centers-table {
+  margin-top: 17px;
+}
+
+.center-row {
+  display: grid;
+  grid-template-columns: 31px minmax(150px, 1fr) minmax(100px, 0.7fr) auto 15px;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+  padding: 11px 0;
+  border: 0;
+  border-top: 1px solid #e4ebec;
+  background: transparent;
+  text-align: left;
+}
+
+.center-row:first-child {
+  border-top: 0;
+}
+
+.center-row:hover b {
+  color: #1b6848;
+}
+
+.center-symbol {
+  display: grid;
+  place-items: center;
+  width: 29px;
+  height: 29px;
+  border-radius: 9px;
+  color: #286b4d;
+  background: #e3efea;
+  font: 700 10px var(--app-font-mono);
+}
+
+.center-row > span:nth-child(2) {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.center-row b {
+  overflow: hidden;
+  color: #25493c;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.center-row small,
+.center-owner {
+  color: #829397;
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.center-owner {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.center-row > svg {
+  color: #afb7ac;
+}
+
+/* ── Responsive ── */
+@media (max-width: 760px) {
+  .center-row {
+    grid-template-columns: 31px 1fr auto 15px;
+  }
+
+  .center-owner {
+    display: none;
+  }
+}

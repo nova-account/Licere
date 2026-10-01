@@ -1,0 +1,38 @@
+/* ── Empty state ── */
+.empty-state {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 62px 20px 70px;
+  text-align: center;
+}
+
+.empty-mark {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
+  color: #2d7354;
+  background: #e2f0e8;
+}
+
+.empty-mark .licere-mark {
+  width: 26px;
+  height: 26px;
+}
+
+.empty-state h3 {
+  margin: 15px 0 5px;
+  color: #315b4a;
+  font:
+    700 15px "Manrope",
+    sans-serif;
+}
+
+.empty-state p {
+  max-width: 340px;
+  margin: 0 0 16px;
+  color: #829397;
+  font-size: 11px;
+}

@@ -1,0 +1,99 @@
+/* ── Modal backdrop ── */
+.modal-backdrop {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  background: rgba(10, 32, 25, 0.32);
+}
+
+/* ── Quick modal ── */
+.quick-modal {
+  align-self: center;
+  width: min(480px, calc(100% - 28px));
+  max-height: min(680px, calc(100dvh - 48px));
+  overflow: auto;
+  border: 1px solid rgba(16, 42, 34, 0.08);
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03), 0 6px 16px -3px rgba(15, 23, 42, 0.04);
+}
+
+/* ── Quick-add options ── */
+.quick-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 20px 22px;
+}
+
+.quick-options button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  border: 1px solid #d9e5e6;
+  border-radius: 11px;
+  background: #fbfcfc;
+  text-align: left;
+  transition:
+    background 0.16s,
+    transform 0.16s;
+}
+
+.quick-options button:hover {
+  background: #edf4f2;
+  transform: translateX(2px);
+}
+
+.quick-option-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+}
+
+.quick-option-icon.green {
+  color: #2d7354;
+  background: #e3f0e8;
+}
+
+.quick-option-icon.sand {
+  color: #637e8a;
+  background: #e6eff1;
+}
+
+.quick-option-icon.blue {
+  color: #5f6e9a;
+  background: #e8eaf4;
+}
+
+.quick-option-icon.forest {
+  color: #245b45;
+  background: #e4efe8;
+}
+
+.quick-options button > span:nth-child(2) {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.quick-options b {
+  color: #47564a;
+  font-size: 12px;
+}
+
+.quick-options small {
+  color: #989f97;
+  font-size: 10px;
+}
+
+.quick-options button > svg {
+  color: #adb5ac;
+}

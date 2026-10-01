@@ -1,69 +1,88 @@
 'use client';
+
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {
-  ArrowDownRight,
-  ArrowUpRight,
   ChevronRight,
   ClipboardCheck,
   FolderOpen,
   Leaf,
   MoreHorizontal,
   ShieldCheck,
+  Building2,
   X,
-  Zap,
-  AlertTriangle
+  AlertTriangle,
 } from 'lucide-react';
-import type { Condicionante, DetailItem, Documento, Licenca } from '@/shared/types';
-import { centros } from '@/shared/data';
 import { StatusPill } from '@/components/shared/status-pill';
-import { PageHeader, cn, initials } from '@/shared/ui';
-
+import { PageHeader, initials } from '@/shared/ui';
 import { Metric } from '@/components/dashboard/Metric';
 import { RiskChart } from '@/components/dashboard/RiskChart';
 import { PriorityList } from '@/components/dashboard/PriorityList';
-
 import { useAppData } from '@/lib/AppDataContext';
+import { getDocumentStatus } from '@/shared/utils';
 
 export default function DashboardPage() {
-  const { licencas, condicionantes, documentos, setDetail: openDetail } = useAppData();
+  const {
+    centros,
+    licencas,
+    condicionantes,
+    documentos,
+    setDetail: openDetail,
+  } = useAppData();
 
   const [notice, setNotice] = useState(true);
+
+  // Cálculos em tempo real conforme as regras de negócio do projeto
+  const ativasCount = centros.filter((c) => c.status === 'Ativa').length;
+  const docsPendentes = documentos.filter(
+    (d) => getDocumentStatus(d.validade) !== 'Válido',
+  ).length;
+  const tarefasPendentes = condicionantes.filter(
+    (c) => c.status !== 'Concluída',
+  ).length;
+  const totalPendencias = docsPendentes + tarefasPendentes;
 
   return (
     <main className="content">
       <PageHeader
-        eyebrow="12 mar 2025 · Operações Brasil"
-        title="Bom dia, Marina."
+        eyebrow="Operações Brasil · Gestão Corporativa"
+        title="Painel Central de Indicadores"
       />
 
       <div className="metric-grid animate-rise">
+        {/* Indicador Geral de Unidades */}
         <Metric
-          label="Índice de conformidade"
-          value="87,4%"
-          detail="+2,8% no mês"
-          icon={ShieldCheck}
-          tone="green"
-          trend="up"
-        />
-        <Metric
-          label="Licenças vigentes"
-          value={`${licencas.filter((l) => l.status !== 'Vencida').length} de ${licencas.length}`}
-          detail="2 pedem atenção"
-          icon={Leaf}
+          label="Total de unidades"
+          value={`${centros.length}`}
+          detail={`${ativasCount} operando ativas`}
+          icon={Building2}
           tone="sand"
         />
+
+        {/* Total de Pendências Integradas (Regra Obrigatória do Edital) */}
         <Metric
-          label="Tarefas em aberto"
-          value={`${condicionantes.filter((c) => c.status !== 'Concluída').length}`}
-          detail="1 vence nesta semana"
+          label="Total de pendências"
+          value={`${totalPendencias}`}
+          detail={`${docsPendentes} docs · ${tarefasPendentes} tarefas`}
+          icon={ShieldCheck}
+          tone={totalPendencias > 5 ? 'peach' : 'green'}
+          trend={totalPendencias > 0 ? 'down' : 'up'}
+        />
+
+        {/* Indicador de Tarefas Pendentes */}
+        <Metric
+          label="Tarefas pendentes"
+          value={`${tarefasPendentes}`}
+          detail="Em andamento ou pendentes"
           icon={ClipboardCheck}
           tone="peach"
         />
+
+        {/* Indicador de Documentos Cadastrados */}
         <Metric
-          label="Documentos atualizados"
-          value="92%"
-          detail={`${documentos.length} no acervo`}
+          label="Total de documentos"
+          value={`${documentos.length}`}
+          detail={`${documentos.length - docsPendentes} válidos no acervo`}
           icon={FolderOpen}
           tone="lavender"
           trend="up"
@@ -76,11 +95,14 @@ export default function DashboardPage() {
             <AlertTriangle size={17} />
           </div>
           <div>
-            <b>Protocolo Preventivo Necessário</b>
-            <span>Licença CETESB 48001234 (CD Cajamar) vence em 154 dias. Iniciar renovação com 120 dias de antecedência.</span>
+            <b>Atenção Operacional em Tempo Real</b>
+            <span>
+              Existem {totalPendencias} pendências monitoradas ({tarefasPendentes}{' '}
+              tarefas e {docsPendentes} documentos exigindo atualização).
+            </span>
           </div>
           <Link href="/tarefas">
-            Abrir tarefa <ChevronRight size={15} />
+            Ver pendências <ChevronRight size={15} />
           </Link>
           <button onClick={() => setNotice(false)} aria-label="fechar aviso">
             <X size={16} />
@@ -105,11 +127,11 @@ export default function DashboardPage() {
               <h2>Unidades</h2>
             </div>
             <Link href="/unidades" className="text-link">
-              Ver unidades <ChevronRight size={14} />
+              Ver unidades ({centros.length}) <ChevronRight size={14} />
             </Link>
           </div>
           <div className="centers-table">
-            {centros.map((center) => (
+            {centros.slice(0, 5).map((center) => (
               <button
                 className="center-row"
                 onClick={() => openDetail(center)}
@@ -173,4 +195,3 @@ export default function DashboardPage() {
     </main>
   );
 }
-

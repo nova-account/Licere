@@ -1,0 +1,110 @@
+/* ── Shared button base (quick-add, primary, secondary, quiet, filter) ── */
+.quick-add,
+.primary-btn,
+.secondary-btn,
+.quiet-btn,
+.filter-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 11px;
+  font-size: 12px;
+  font-weight: 600;
+  transition:
+    transform 0.16s,
+    background 0.16s;
+}
+
+/* ── Primary / quick-add ── */
+.quick-add,
+.primary-btn {
+  border: 1px solid #176044;
+  color: hsl(var(--primary-foreground));
+  background: #176044;
+  box-shadow: 0 5px 12px rgba(32, 95, 67, 0.12);
+}
+
+.quick-add {
+  height: 35px;
+  padding: 0 13px;
+}
+
+.primary-btn {
+  height: 38px;
+  padding: 0 15px;
+}
+
+.quick-add:hover,
+.primary-btn:hover {
+  background: #104c35;
+  transform: translateY(-2px);
+}
+
+/* ── Secondary ── */
+.secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 33px;
+  padding: 10px 16px;
+  border: 1px solid #dce9df;
+  border-radius: 10px;
+  color: #1b6848;
+  background: #fbfcfc;
+  font-size: 11px;
+  text-decoration: none;
+}
+
+.secondary-btn:hover {
+  background: #e9f1ee;
+  transform: translateY(-1px);
+}
+
+/* ── Quiet / filter ── */
+.quiet-btn,
+.filter-btn {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid #d8e5dc;
+  border-radius: 9px;
+  color: #648273;
+  background: #f8fbf8;
+}
+
+.quiet-btn:hover,
+.filter-btn:hover {
+  color: #175f42;
+  background: #e8f0ed;
+}
+
+.filter-btn {
+  height: 37px;
+  font-size: 11px;
+}
+
+.drawer-foot .quiet-btn {
+  border: 0;
+}
+
+/* ── Mobile quick-add collapse ── */
+@media (max-width: 760px) {
+  .quick-add {
+    width: 35px;
+    padding: 0;
+    font-size: 0;
+  }
+
+  .quick-add svg {
+    margin: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .select-wrap,
+  .filter-btn {
+    flex: 1 1 calc(50% - 4px) !important;
+    justify-content: center !important;
+    height: 40px !important;
+  }
+}

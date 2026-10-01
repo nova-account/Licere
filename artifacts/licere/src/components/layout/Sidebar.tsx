@@ -1,25 +1,34 @@
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Building2,
-  ChevronDown,
-  ChevronRight,
   CircleHelp,
   ClipboardCheck,
   FolderOpen,
   LayoutDashboard,
   ListTodo,
-  LogIn,
+  LogOut,
   MoreHorizontal,
   ShieldCheck,
   X,
 } from 'lucide-react';
 import { Mark, cn } from '@/shared/ui';
-import { centros, initialCondicionantes } from '@/shared/data';
+import { useAppData } from '@/lib/AppDataContext';
 
 export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { centros, condicionantes } = useAppData();
+
+  const handleLogout = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('licere_auth_user');
+    }
+    onClose();
+    router.replace('/login');
+  };
+
   const nav = [
     { href: '/dashboard', label: 'Visão geral', icon: LayoutDashboard },
     {
@@ -33,9 +42,10 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
       href: '/tarefas',
       label: 'Tarefas',
       icon: ListTodo,
-      count: initialCondicionantes.length,
+      count: condicionantes.filter((c) => c.status !== 'Concluída').length,
     },
   ];
+
   const secondaryNav = [
     { href: '/licencas', label: 'Licenças', icon: ShieldCheck },
     { href: '/condicionantes', label: 'Condicionantes', icon: ClipboardCheck },
@@ -61,7 +71,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
         <span className="workspace-avatar">OB</span>
         <span>
           <b>Operações Brasil</b>
-          <small>Acesso Administrador</small>
+          <small>Acesso Corporativo</small>
         </span>
       </div>
 
@@ -79,7 +89,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
           >
             <NavIcon size={18} strokeWidth={1.8} />
             <span>{label}</span>
-            {count ? <em>{count}</em> : null}
+            {count !== undefined && count > 0 ? <em>{count}</em> : null}
           </Link>
         ))}
       </nav>
@@ -103,30 +113,34 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
         ))}
       </div>
 
-
-
       <div className="sidebar-bottom">
         <Link href="/ajuda" onClick={onClose} className="help-link">
           <CircleHelp size={17} />
           Central de ajuda
         </Link>
-        <Link href="/login" onClick={onClose} className="help-link access-link">
-          <LogIn size={17} />
-          Acesso de demonstração
-        </Link>
-        <Link
-          href="/perfil"
-          onClick={onClose}
-          className="profile"
-          data-testid="link-profile"
-        >
-          <span className="profile-avatar">MA</span>
-          <span>
-            <b>Marina Azevedo</b>
-            <small>Administradora</small>
-          </span>
-          <MoreHorizontal size={16} />
-        </Link>
+        <div className="profile-footer">
+          <Link
+            href="/perfil"
+            onClick={onClose}
+            className="profile"
+            data-testid="link-profile"
+          >
+            <span className="profile-avatar">MA</span>
+            <span>
+              <b>Marina Azevedo</b>
+              <small>Administradora</small>
+            </span>
+          </Link>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="logout-icon-btn"
+            title="Encerrar sessão"
+            aria-label="Encerrar sessão"
+          >
+            <LogOut size={16} />
+          </button>
+        </div>
       </div>
     </aside>
   );

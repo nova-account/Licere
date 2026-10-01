@@ -1,27 +1,36 @@
 import React from 'react';
-import { ChevronRight, ClipboardCheck, FileCheck2, ShieldCheck, X } from 'lucide-react';
+import {
+  Building2,
+  ChevronRight,
+  ClipboardCheck,
+  FileCheck2,
+  ShieldCheck,
+  X,
+} from 'lucide-react';
+
+export type QuickActionType = 'tarefa' | 'documento' | 'licenca' | 'unidade';
 
 export function QuickAdd({
   onClose,
-  onCreate,
+  onSelectAction,
 }: {
   onClose: () => void;
-  onCreate: (kind: 'licenca' | 'condicionante' | 'documento') => void;
+  onSelectAction: (kind: QuickActionType) => void;
 }) {
   return (
     <div
-      className="modal-backdrop"
+      className="modal-backdrop animate-fade"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
-      <section className="quick-modal animate-fade">
+      <section className="quick-modal animate-rise">
         <div className="drawer-head">
           <div>
             <p className="eyebrow">Ação rápida</p>
             <h2>O que você quer registrar?</h2>
-            <span>Escolha o registro que entra no radar.</span>
+            <span>Escolha o registro que entra no radar operacional.</span>
           </div>
           <button
-            aria-label="fechar adicionar"
+            aria-label="fechar ação rápida"
             onClick={onClose}
             className="icon-btn"
           >
@@ -30,11 +39,42 @@ export function QuickAdd({
         </div>
 
         <div className="quick-options">
+          {/* Nova Tarefa */}
           <button
-            onClick={() => {
-              onCreate('licenca');
-              onClose();
-            }}
+            type="button"
+            onClick={() => onSelectAction('tarefa')}
+            data-testid="button-quick-tarefa"
+          >
+            <span className="quick-option-icon sand">
+              <ClipboardCheck size={20} />
+            </span>
+            <span>
+              <b>Nova tarefa</b>
+              <small>Adicione uma obrigação para acompanhamento</small>
+            </span>
+            <ChevronRight size={16} />
+          </button>
+
+          {/* Novo Documento */}
+          <button
+            type="button"
+            onClick={() => onSelectAction('documento')}
+            data-testid="button-quick-documento"
+          >
+            <span className="quick-option-icon blue">
+              <FileCheck2 size={20} />
+            </span>
+            <span>
+              <b>Novo documento</b>
+              <small>Vincule uma evidência ou laudo operacional</small>
+            </span>
+            <ChevronRight size={16} />
+          </button>
+
+          {/* Nova Licença */}
+          <button
+            type="button"
+            onClick={() => onSelectAction('licenca')}
             data-testid="button-quick-licenca"
           >
             <span className="quick-option-icon green">
@@ -42,41 +82,23 @@ export function QuickAdd({
             </span>
             <span>
               <b>Nova licença</b>
-              <small>Cadastre um ato autorizativo</small>
+              <small>Cadastre um ato autorizativo ambiental</small>
             </span>
             <ChevronRight size={16} />
           </button>
 
+          {/* Nova Unidade */}
           <button
-            onClick={() => {
-              onCreate('condicionante');
-              onClose();
-            }}
-            data-testid="button-quick-condicionante"
+            type="button"
+            onClick={() => onSelectAction('unidade')}
+            data-testid="button-quick-unidade"
           >
-            <span className="quick-option-icon sand">
-              <ClipboardCheck size={20} />
+            <span className="quick-option-icon forest">
+              <Building2 size={20} />
             </span>
             <span>
-              <b>Nova condicionante</b>
-              <small>Adicione uma obrigação para acompanhar</small>
-            </span>
-            <ChevronRight size={16} />
-          </button>
-
-          <button
-            onClick={() => {
-              onCreate('documento');
-              onClose();
-            }}
-            data-testid="button-quick-documento"
-          >
-            <span className="quick-option-icon dark">
-              <FileCheck2 size={20} />
-            </span>
-            <span>
-              <b>Novo documento</b>
-              <small>Vincule uma evidência operacional</small>
+              <b>Nova unidade</b>
+              <small>Cadastre um centro de distribuição ou filial</small>
             </span>
             <ChevronRight size={16} />
           </button>

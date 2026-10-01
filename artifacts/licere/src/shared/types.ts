@@ -1,13 +1,22 @@
 export type Status =
   | 'Regular'
   | 'A vencer'
+  | 'Próximo do vencimento'
   | 'Vencida'
+  | 'Expirada'
+  | 'Expirado'
   | 'Em análise'
   | 'Em andamento'
   | 'Concluída'
   | 'Pendente'
   | 'Vigente'
-  | 'Expirada';
+  | 'Válido'
+  | 'Operando'
+  | 'Em expansão'
+  | 'Ativa'
+  | 'Inativa';
+
+export type CentroStatus = 'Ativa' | 'Inativa';
 
 export type Centro = {
   id: string;
@@ -15,7 +24,7 @@ export type Centro = {
   cidade: string;
   estado: string;
   responsavel: string;
-  status: string;
+  status: CentroStatus;
 };
 
 export type Licenca = {

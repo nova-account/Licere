@@ -1,5 +1,15 @@
 import type { Centro, Condicionante, Documento, Licenca } from './types';
 
+// Datas dinâmicas para garantir demonstração consistente de status (Válido, Próximo do Vencimento <= 15 dias, Expirado)
+const now = new Date();
+const addDays = (d: number) => {
+  const dt = new Date(now.getTime() + d * 86400000);
+  const y = dt.getFullYear();
+  const m = String(dt.getMonth() + 1).padStart(2, '0');
+  const day = String(dt.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
 export const centros: Centro[] = [
   {
     id: 'cd-sp',
@@ -7,7 +17,7 @@ export const centros: Centro[] = [
     cidade: 'Cajamar',
     estado: 'SP',
     responsavel: 'Marina Azevedo',
-    status: 'Operando',
+    status: 'Ativa',
   },
   {
     id: 'cd-jundiai',
@@ -15,7 +25,7 @@ export const centros: Centro[] = [
     cidade: 'Jundiaí',
     estado: 'SP',
     responsavel: 'Ricardo Nunes',
-    status: 'Operando',
+    status: 'Ativa',
   },
   {
     id: 'cd-extrema',
@@ -23,7 +33,7 @@ export const centros: Centro[] = [
     cidade: 'Extrema',
     estado: 'MG',
     responsavel: 'Bianca Tavares',
-    status: 'Operando',
+    status: 'Ativa',
   },
   {
     id: 'cd-joinville',
@@ -31,7 +41,7 @@ export const centros: Centro[] = [
     cidade: 'Joinville',
     estado: 'SC',
     responsavel: 'Caio Martins',
-    status: 'Em expansão',
+    status: 'Ativa',
   },
   {
     id: 'cd-goiania',
@@ -39,7 +49,23 @@ export const centros: Centro[] = [
     cidade: 'Aparecida de Goiânia',
     estado: 'GO',
     responsavel: 'Helena Freitas',
-    status: 'Operando',
+    status: 'Ativa',
+  },
+  {
+    id: 'cd-betim',
+    nome: 'CD Betim',
+    cidade: 'Betim',
+    estado: 'MG',
+    responsavel: 'Lucas Silveira',
+    status: 'Inativa',
+  },
+  {
+    id: 'cd-curitiba',
+    nome: 'Filial Curitiba',
+    cidade: 'Curitiba',
+    estado: 'PR',
+    responsavel: 'Fernanda Costa',
+    status: 'Inativa',
   },
 ];
 
@@ -51,7 +77,7 @@ export const initialLicencas: Licenca[] = [
     centroId: 'cd-sp',
     orgao: 'CETESB',
     emissao: '2023-08-14',
-    vencimento: '2025-08-14',
+    vencimento: addDays(12), // Próximo do vencimento
     status: 'A vencer',
     criticidade: 'Alta',
     observacao: 'Renovação deve ser protocolada 120 dias antes do vencimento.',
@@ -63,7 +89,7 @@ export const initialLicencas: Licenca[] = [
     centroId: 'cd-jundiai',
     orgao: 'CETESB',
     emissao: '2024-02-22',
-    vencimento: '2026-02-22',
+    vencimento: addDays(365),
     status: 'Vigente',
     criticidade: 'Média',
     observacao: 'Obra de ampliação do armazém B.',
@@ -75,7 +101,7 @@ export const initialLicencas: Licenca[] = [
     centroId: 'cd-extrema',
     orgao: 'SEMAD / MG',
     emissao: '2024-06-03',
-    vencimento: '2028-06-03',
+    vencimento: addDays(400),
     status: 'Regular',
     criticidade: 'Baixa',
     observacao: 'Operação condicionada ao relatório anual de efluentes.',
@@ -87,7 +113,7 @@ export const initialLicencas: Licenca[] = [
     centroId: 'cd-joinville',
     orgao: 'IMA / SC',
     emissao: '2021-11-18',
-    vencimento: '2025-11-18',
+    vencimento: addDays(9), // Próximo do vencimento
     status: 'A vencer',
     criticidade: 'Alta',
     observacao: 'Iniciar renovação após inspeção do sistema de drenagem.',
@@ -99,7 +125,7 @@ export const initialLicencas: Licenca[] = [
     centroId: 'cd-goiania',
     orgao: 'SEMAD / GO',
     emissao: '2023-04-10',
-    vencimento: '2025-04-10',
+    vencimento: '2024-04-10', // Vencida
     status: 'Vencida',
     criticidade: 'Alta',
     observacao: 'Aguardando análise de documentação complementar.',
@@ -111,10 +137,22 @@ export const initialLicencas: Licenca[] = [
     centroId: 'cd-sp',
     orgao: 'DAEE / SP',
     emissao: '2024-09-01',
-    vencimento: '2029-09-01',
+    vencimento: addDays(800),
     status: 'Regular',
     criticidade: 'Baixa',
     observacao: 'Captação subterrânea para uso não potável.',
+  },
+  {
+    id: 'lic-7',
+    numero: 'SEMAD-MG 2021/045',
+    tipo: 'Licença Suspensa (Unidade Inativa)',
+    centroId: 'cd-betim',
+    orgao: 'SEMAD / MG',
+    emissao: '2021-01-10',
+    vencimento: '2023-01-10',
+    status: 'Vencida',
+    criticidade: 'Alta',
+    observacao: 'Unidade desativada temporariamente para reestruturação.',
   },
 ];
 
@@ -125,7 +163,7 @@ export const initialCondicionantes: Condicionante[] = [
     licencaId: 'lic-1',
     centroId: 'cd-sp',
     responsavel: 'Marina Azevedo',
-    prazo: '2025-03-28',
+    prazo: addDays(5),
     status: 'Pendente',
     recorrencia: 'Trimestral',
   },
@@ -135,7 +173,7 @@ export const initialCondicionantes: Condicionante[] = [
     licencaId: 'lic-1',
     centroId: 'cd-sp',
     responsavel: 'Eduardo Lima',
-    prazo: '2025-04-12',
+    prazo: addDays(25),
     status: 'Em andamento',
     recorrencia: 'Semestral',
   },
@@ -145,7 +183,7 @@ export const initialCondicionantes: Condicionante[] = [
     licencaId: 'lic-3',
     centroId: 'cd-extrema',
     responsavel: 'Bianca Tavares',
-    prazo: '2025-05-06',
+    prazo: addDays(60),
     status: 'Concluída',
     recorrencia: 'Anual',
   },
@@ -155,7 +193,7 @@ export const initialCondicionantes: Condicionante[] = [
     licencaId: 'lic-4',
     centroId: 'cd-joinville',
     responsavel: 'Caio Martins',
-    prazo: '2025-03-19',
+    prazo: addDays(8),
     status: 'Pendente',
     recorrencia: 'Anual',
   },
@@ -165,8 +203,8 @@ export const initialCondicionantes: Condicionante[] = [
     licencaId: 'lic-2',
     centroId: 'cd-jundiai',
     responsavel: 'Ricardo Nunes',
-    prazo: '2025-04-01',
-    status: 'Pendente',
+    prazo: addDays(15),
+    status: 'Em andamento',
     recorrencia: 'Mensal',
   },
   {
@@ -175,9 +213,19 @@ export const initialCondicionantes: Condicionante[] = [
     licencaId: 'lic-5',
     centroId: 'cd-goiania',
     responsavel: 'Helena Freitas',
-    prazo: '2025-04-30',
-    status: 'Vencida',
+    prazo: '2024-04-30',
+    status: 'Pendente',
     recorrencia: 'Anual',
+  },
+  {
+    id: 'con-7',
+    titulo: 'Inventário de passivos ambientais (Unidade Inativa)',
+    licencaId: 'lic-7',
+    centroId: 'cd-betim',
+    responsavel: 'Lucas Silveira',
+    prazo: '2024-12-15',
+    status: 'Pendente',
+    recorrencia: 'Única',
   },
 ];
 
@@ -188,7 +236,7 @@ export const initialDocumentos: Documento[] = [
     categoria: 'Relatórios',
     centroId: 'cd-sp',
     atualizadoEm: '18 fev 2025',
-    validade: '2025-03-28',
+    validade: addDays(8), // Próximo do vencimento (<= 15 dias)
     tamanho: '2.4 MB',
     licencaId: 'lic-1',
     condicionanteId: 'con-1',
@@ -199,17 +247,17 @@ export const initialDocumentos: Documento[] = [
     categoria: 'Certificados',
     centroId: 'cd-sp',
     atualizadoEm: '03 mar 2025',
-    validade: 'Indeterminada',
+    validade: 'Indeterminada', // Válido
     tamanho: '840 KB',
     licencaId: 'lic-1',
   },
   {
     id: 'doc-3',
-    nome: 'PGRS — Plano de Gerenciamento de Resíduos Sólidos 2024.pdf',
+    nome: 'PGRS — Plano de Gerenciamento de Resíduos Sólidos 2025.pdf',
     categoria: 'Planos & Laudos',
     centroId: 'cd-extrema',
     atualizadoEm: '14 jan 2025',
-    validade: '2025-05-06',
+    validade: addDays(180), // Válido
     tamanho: '6.1 MB',
     licencaId: 'lic-3',
     condicionanteId: 'con-3',
@@ -220,7 +268,7 @@ export const initialDocumentos: Documento[] = [
     categoria: 'Planos & Laudos',
     centroId: 'cd-jundiai',
     atualizadoEm: '28 nov 2024',
-    validade: '2025-11-28',
+    validade: addDays(240), // Válido
     tamanho: '1.8 MB',
     licencaId: 'lic-2',
   },
@@ -230,7 +278,7 @@ export const initialDocumentos: Documento[] = [
     categoria: 'Licenças',
     centroId: 'cd-sp',
     atualizadoEm: '14 ago 2023',
-    validade: '2025-08-14',
+    validade: '2024-08-14', // Expirado
     tamanho: '4.2 MB',
     licencaId: 'lic-1',
   },
@@ -240,9 +288,20 @@ export const initialDocumentos: Documento[] = [
     categoria: 'Protocolos',
     centroId: 'cd-goiania',
     atualizadoEm: '02 fev 2025',
-    validade: '2025-04-10',
+    validade: '2024-10-10', // Expirado
     tamanho: '512 KB',
     licencaId: 'lic-5',
     condicionanteId: 'con-6',
+  },
+  {
+    id: 'doc-7',
+    nome: 'Alvará Sanitário Betim — Histórico.pdf',
+    categoria: 'Licenças',
+    centroId: 'cd-betim',
+    atualizadoEm: '10 out 2023',
+    validade: '2024-05-20', // Expirado
+    tamanho: '1.2 MB',
+    licencaId: 'lic-7',
+    condicionanteId: 'con-7',
   },
 ];

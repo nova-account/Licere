@@ -1,20 +1,103 @@
 'use client';
-import { type FormEvent, useState } from 'react';
-import { ArrowRight, Eye, EyeOff } from 'lucide-react';
+
+import { useState } from 'react';
+import { ArrowRight, Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Mark } from '@/shared/ui';
-
 import { ForgotPasswordModal } from '@/components/modals/ForgotPasswordModal';
+
+const loginSchema = z.object({
+  email: z
+    .string()
+    .min(1, 'O e-mail corporativo é obrigatório.')
+    .email('Informe um e-mail corporativo válido (ex: nome@empresa.com.br).'),
+  password: z
+    .string()
+    .min(1, 'A senha de acesso é obrigatória.')
+    .min(6, 'A senha deve conter no mínimo 6 caracteres.'),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
   const [forgotOpen, setForgotOpen] = useState(false);
-  const submit = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); router.push('/dashboard'); };
+  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
+    setStatusMessage(null);
+
+    // Simulação de validação de credenciais
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      
+      // Salva a sessão de autenticação exigida pelo edital
+      localStorage.setItem(
+        'licere_auth_user',
+        JSON.stringify({
+          email: data.email,
+          role: 'Administrador',
+          nome: 'Marina Azevedo',
+          authenticatedAt: new Date().toISOString(),
+        }),
+      );
+
+      setStatusMessage({
+        type: 'success',
+        text: 'Acesso autenticado com sucesso! Redirecionando para o painel...',
+      });
+
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 700);
+    } catch {
+      setStatusMessage({
+        type: 'error',
+        text: 'Falha ao autenticar. Verifique seus dados e tente novamente.',
+      });
+    }
+  };
+
+  const handleDemoAccess = () => {
+    setValue('email', 'marina.azevedo@empresa.com.br', { shouldValidate: true });
+    setValue('password', 'licere2026', { shouldValidate: true });
+    localStorage.setItem(
+      'licere_auth_user',
+      JSON.stringify({
+        email: 'marina.azevedo@empresa.com.br',
+        role: 'Administrador',
+        nome: 'Marina Azevedo',
+        authenticatedAt: new Date().toISOString(),
+      }),
+    );
+    setStatusMessage({
+      type: 'success',
+      text: 'Acesso rápido demonstrativo autorizado. Entrando...',
+    });
+    setTimeout(() => {
+      router.push('/dashboard');
+    }, 500);
+  };
+
   return (
     <div className="login-page">
       <header className="login-header">
@@ -23,6 +106,7 @@ export default function Login() {
           <span>licere</span>
         </Link>
       </header>
+
       <main className="login-main">
         <section className="login-card" aria-label="Acesso à Licere">
           <div className="login-visual">
@@ -31,25 +115,59 @@ export default function Login() {
               <b>Conformidade que<br />se deixa ler.</b>
             </div>
           </div>
+
           <section className="login-form-panel">
             <div className="login-form-heading">
               <p className="eyebrow">Acesso corporativo</p>
               <h1>Entrar na Licere</h1>
-              <p>Acesse o painel das suas unidades operacionais.</p>
+              <p>Acesse o painel integrado das suas unidades operacionais.</p>
             </div>
-            <form className="login-form" onSubmit={submit}>
+
+            {statusMessage && (
+              <div
+                style={{
+                  margin: '12px 0 16px',
+                  padding: '12px 14px',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  fontSize: '13px',
+                  background: statusMessage.type === 'success' ? '#eef7f2' : '#fdeded',
+                  border: statusMessage.type === 'success' ? '1px solid #b7dfca' : '1px solid #f5c2c7',
+                  color: statusMessage.type === 'success' ? '#1c4d39' : '#b02a37',
+                }}
+              >
+                {statusMessage.type === 'success' ? (
+                  <CheckCircle2 size={18} style={{ flexShrink: 0 }} />
+                ) : (
+                  <AlertCircle size={18} style={{ flexShrink: 0 }} />
+                )}
+                <span>{statusMessage.text}</span>
+              </div>
+            )}
+
+            <form className="login-form" onSubmit={handleSubmit(onSubmit)} noValidate>
               <label className="login-field">
                 <span>E-mail corporativo</span>
                 <input
                   type="email"
                   autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="nome@empresa.com.br"
-                  required
+                  {...register('email')}
+                  style={{
+                    borderColor: errors.email ? '#b02a37' : undefined,
+                    background: errors.email ? '#fffbfb' : undefined,
+                  }}
                   data-testid="input-login-email"
                 />
+                {errors.email && (
+                  <span style={{ color: '#b02a37', fontSize: '11px', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <AlertCircle size={12} /> {errors.email.message}
+                  </span>
+                )}
               </label>
+
               <div className="login-field">
                 <div className="login-field-label">
                   <label htmlFor="password" style={{ display: 'block' }}>Senha</label>
@@ -66,10 +184,12 @@ export default function Login() {
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     autoComplete="current-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="Digite sua senha"
-                    required
+                    {...register('password')}
+                    style={{
+                      borderColor: errors.password ? '#b02a37' : undefined,
+                      background: errors.password ? '#fffbfb' : undefined,
+                    }}
                     data-testid="input-login-password"
                   />
                   <button
@@ -82,7 +202,13 @@ export default function Login() {
                     {showPassword ? <Eye size={17} /> : <EyeOff size={17} />}
                   </button>
                 </span>
+                {errors.password && (
+                  <span style={{ color: '#b02a37', fontSize: '11px', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <AlertCircle size={12} /> {errors.password.message}
+                  </span>
+                )}
               </div>
+
               <label className="remember-check">
                 <input
                   type="checkbox"
@@ -93,32 +219,38 @@ export default function Login() {
                 />
                 <span>Lembrar este acesso</span>
               </label>
+
               <button
                 className="login-submit"
                 type="submit"
+                disabled={isSubmitting}
                 data-testid="button-login-submit"
+                style={{ opacity: isSubmitting ? 0.7 : 1 }}
               >
-                Entrar <ArrowRight size={17} />
+                {isSubmitting ? 'Validando...' : 'Entrar na plataforma'} <ArrowRight size={17} />
               </button>
             </form>
+
             <div className="login-divider">
               <span>ou</span>
             </div>
+
             <button
               type="button"
               className="sso-button"
-              onClick={() => router.push('/dashboard')}
+              onClick={handleDemoAccess}
               data-testid="button-login-sso"
             >
               <span className="sso-symbol">
                 <i /><i /><i /><i />
               </span>
-              Continuar com SSO corporativo
+              Entrar com SSO corporativo
             </button>
+
             <div className="login-form-foot">
               <button
                 type="button"
-                onClick={() => router.push('/dashboard')}
+                onClick={handleDemoAccess}
                 data-testid="button-login-explore"
               >
                 Explorar workspace de demonstração →
@@ -127,6 +259,7 @@ export default function Login() {
           </section>
         </section>
       </main>
+
       <footer className="public-footer">
         <span>
           <span style={{ fontFamily: 'var(--app-font-sans)', fontSize: '13px' }}>&copy;</span> 2026 Licere
@@ -136,6 +269,7 @@ export default function Login() {
           <a href="#terms" onClick={(e) => e.preventDefault()}>Termos</a>
         </nav>
       </footer>
+
       <ForgotPasswordModal open={forgotOpen} onClose={() => setForgotOpen(false)} />
     </div>
   );

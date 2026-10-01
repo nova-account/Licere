@@ -1,0 +1,177 @@
+/* ── Base pill ── */
+.status-pill,
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6.5px;
+  width: fit-content;
+  padding: 3.5px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+  letter-spacing: 0.015em;
+  border: 1px solid transparent;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.status-pill i,
+.pill i {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* status-pill variant (compact, used in table rows) */
+.status-pill {
+  gap: 5px;
+  padding: 4px 7px;
+  border-radius: 5px;
+  font-size: 10px;
+}
+
+.status-pill i {
+  width: 5px;
+  height: 5px;
+}
+
+/* ── Color variants ── */
+.status-good,
+.pill-good {
+  color: #2d7050;
+  background: #e2f0e6;
+  border-color: rgba(14, 102, 68, 0.22);
+}
+
+.status-notice,
+.pill-notice {
+  color: #0e5d8c;
+  background: #e6f2fb;
+  border-color: rgba(14, 93, 140, 0.22);
+}
+
+.status-warn,
+.pill-warn {
+  color: #927d4f;
+  background: #f1efe5;
+  border-color: rgba(129, 74, 0, 0.22);
+}
+
+.status-orange,
+.pill-orange {
+  color: #8d3e09;
+  background: #feeee4;
+  border-color: rgba(141, 62, 9, 0.22);
+}
+
+.status-bad,
+.pill-bad {
+  color: #a35852;
+  background: #f4e8e7;
+  border-color: rgba(153, 21, 32, 0.25);
+}
+
+.pill-bad i {
+  animation: pill-beacon 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pill-beacon {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.35);
+    opacity: 0.65;
+  }
+}
+
+/* ── Dark mode variants ── */
+.dark .status-good,
+.dark .pill-good {
+  color: #52e09b;
+  background: rgba(82, 224, 155, 0.12);
+  border-color: rgba(82, 224, 155, 0.28);
+}
+
+.dark .status-notice,
+.dark .pill-notice {
+  color: #60a5fa;
+  background: rgba(96, 165, 250, 0.12);
+  border-color: rgba(96, 165, 250, 0.28);
+}
+
+.dark .status-warn,
+.dark .pill-warn {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.28);
+}
+
+.dark .status-orange,
+.dark .pill-orange {
+  color: #fb923c;
+  background: rgba(251, 146, 60, 0.12);
+  border-color: rgba(251, 146, 60, 0.28);
+}
+
+.dark .status-bad,
+.dark .pill-bad {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.14);
+  border-color: rgba(248, 113, 113, 0.32);
+}
+
+/* ── Criticality indicators ── */
+.criticality {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+}
+
+.criticality i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.criticality-alta {
+  color: #a54d41;
+}
+
+.criticality-alta i {
+  background: #be5d4d;
+}
+
+.criticality-média {
+  color: #a57331;
+}
+
+.criticality-média i {
+  background: #d59a48;
+}
+
+.criticality-baixa {
+  color: #3d7858;
+}
+
+.criticality-baixa i {
+  background: #5b9a73;
+}
+
+/* ── Date danger ── */
+.date-danger {
+  color: #991520;
+  font-weight: 700;
+}
+
+.dark .date-danger {
+  color: #f87171;
+}

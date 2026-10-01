@@ -98,7 +98,7 @@ export function RiskChart() {
                 stroke: "#d97706",
                 strokeWidth: 2,
               }}
-              dot={(props: any) => {
+              dot={(props: { cx?: number; cy?: number; index?: number }) => {
                 const { cx, cy, index } = props;
                 // Destaca o mês de Outubro (index 9) como na versão original
                 if (index === 9) {

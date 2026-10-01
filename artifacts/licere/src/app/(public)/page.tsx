@@ -131,6 +131,16 @@ export default function HomePage() {
                       <small className="preview-sub" style={{ marginTop: 0 }}>Em operação total</small>
                     </div>
                   </div>
+                  <div className="preview-metric">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span className="preview-label">Documentos</span>
+                      <FileText size={16} color="#6a8277" />
+                    </div>
+                    <strong className="preview-val">1.4k</strong>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                      <small className="preview-sub" style={{ marginTop: 0 }}>Acervo digital</small>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Mock Live Alert Banner */}
@@ -434,3 +444,4 @@ export default function HomePage() {
     </div>
   );
 }
+

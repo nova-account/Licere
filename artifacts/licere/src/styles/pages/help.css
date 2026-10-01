@@ -1,0 +1,106 @@
+/* ── Help page ── */
+.help-page {
+  padding-bottom: 100px;
+}
+
+.help-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 40px;
+  margin-bottom: 50px;
+}
+
+/* ── Help card ── */
+.help-card {
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid rgba(16, 42, 34, 0.08);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+}
+
+.help-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: #e1f0e4;
+  color: #357757;
+  margin-bottom: 16px;
+}
+
+.help-card h2 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #194333;
+  margin: 0 0 8px;
+}
+
+.help-card p {
+  color: #6f897a;
+  font-size: 13px;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.help-card a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #357757;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ── Help contact banner ── */
+.help-contact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid rgba(16, 42, 34, 0.08);
+  border-radius: 12px;
+}
+
+.help-contact > div {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #194333;
+}
+
+.help-contact b {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.help-contact p {
+  color: #6f897a;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .help-contact {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .help-contact > div {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .help-card a {
+    font-size: 12px !important;
+  }
+}

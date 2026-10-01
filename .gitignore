@@ -51,6 +51,7 @@ Thumbs.db
 **/.next/
 out/
 **/out/
+temp.diff
 
 # Secrets and local env
 .env

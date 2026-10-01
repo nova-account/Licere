@@ -1,0 +1,218 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap");
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card-border: hsl(var(--card-border));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+  --font-sans: var(--app-font-sans);
+  --font-mono: var(--app-font-mono);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --background: 215 15% 98%;
+  --foreground: 215 32% 12%;
+  --border: 215 15% 91%;
+  --input: 215 15% 90%;
+  --ring: 165 58% 18%;
+  --card: 0 0% 100%;
+  --card-foreground: 215 32% 12%;
+  --card-border: 215 14% 92%;
+  --primary: 165 58% 18%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 20% 96%;
+  --secondary-foreground: 165 58% 16%;
+  --muted: 210 18% 95%;
+  --muted-foreground: 215 16% 40%;
+  --accent: 38 92% 48%;
+  --accent-foreground: 215 25% 15%;
+  --destructive: 356 75% 45%;
+  --destructive-foreground: 0 0% 100%;
+  --chart-1: 165 58% 20%;
+  --chart-2: 38 92% 48%;
+  --chart-3: 205 75% 42%;
+  --chart-4: 356 75% 45%;
+  --chart-5: 165 40% 45%;
+  --sidebar: 166 52% 10%;
+  --sidebar-foreground: 150 20% 96%;
+  --sidebar-border: 166 32% 16%;
+  --sidebar-primary: 165 58% 22%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 166 40% 16%;
+  --sidebar-accent-foreground: 150 20% 96%;
+  --sidebar-ring: 165 58% 22%;
+  --app-font-sans: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --app-font-mono: "Space Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --radius: 0.75rem;
+  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 14px -2px rgba(15, 23, 42, 0.05);
+  --shadow-card-hover: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 12px 24px -4px rgba(15, 23, 42, 0.08);
+  --shadow-popover: 0 10px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.06);
+}
+
+.dark {
+  --background: 166 45% 6%;
+  --foreground: 150 18% 95%;
+  --border: 166 25% 15%;
+  --input: 166 25% 18%;
+  --card: 166 35% 9%;
+  --card-foreground: 150 18% 95%;
+  --card-border: 166 25% 15%;
+  --muted: 166 25% 13%;
+  --muted-foreground: 150 14% 68%;
+  --secondary: 166 25% 14%;
+  --secondary-foreground: 150 20% 95%;
+  --sidebar: 166 48% 6%;
+  --sidebar-foreground: 150 20% 95%;
+  --sidebar-border: 166 25% 12%;
+  --sidebar-accent: 166 35% 12%;
+}
+
+/* ── Reset & base ── */
+* {
+  border-color: hsl(var(--border));
+}
+
+html {
+  background: #f8f9fa;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #f8f9fa;
+  color: hsl(var(--foreground));
+  font-family: var(--app-font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  user-select: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(41, 113, 81, 0.24);
+  outline-offset: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+/* ── Typography utilities ── */
+.font-display {
+  font-family: "Manrope", sans-serif;
+}
+
+.font-mono {
+  font-family: var(--app-font-mono);
+}
+
+/* ── Animations ── */
+.animate-rise {
+  animation: rise 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.animate-fade {
+  animation: fade 0.4s ease both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Misc ── */
+.app-noise::after {
+  display: none;
+  opacity: 0.01;
+}
+
+kbd {
+  padding: 2px 6px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 4px;
+  color: hsl(var(--muted-foreground));
+  font: 10px var(--app-font-mono);
+  background: hsl(var(--muted));
+}

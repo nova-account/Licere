@@ -69,6 +69,8 @@ export function DetailPanel({
       onClose={onClose}
       onOpen={onOpen}
       licencas={licencas}
+      condicionantes={condicionantes}
+      documentos={documentos}
     />
   );
 }

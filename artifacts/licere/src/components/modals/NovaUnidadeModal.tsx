@@ -1,6 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { X, Save, Building2 } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { X, Save, Building2, AlertCircle } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import type { Centro } from '@/shared/types';
+
+const novaUnidadeSchema = z.object({
+  nome: z.string().min(3, 'O nome da unidade deve ter no mínimo 3 caracteres.'),
+  cidade: z.string().min(2, 'O município é obrigatório.'),
+  estado: z.string().min(2, 'A UF é obrigatória.'),
+  responsavel: z.string().min(3, 'O nome do responsável é obrigatório.'),
+  status: z.enum(['Ativa', 'Inativa']),
+});
+
+type NovaUnidadeFormData = z.infer<typeof novaUnidadeSchema>;
 
 interface NovaUnidadeModalProps {
   open: boolean;
@@ -9,11 +22,21 @@ interface NovaUnidadeModalProps {
 }
 
 export function NovaUnidadeModal({ open, onClose, onSave }: NovaUnidadeModalProps) {
-  const [nome, setNome] = useState('');
-  const [cidade, setCidade] = useState('');
-  const [estado, setEstado] = useState('SP');
-  const [responsavel, setResponsavel] = useState('');
-  const [status, setStatus] = useState<Centro['status']>('Operando');
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<NovaUnidadeFormData>({
+    resolver: zodResolver(novaUnidadeSchema),
+    defaultValues: {
+      nome: '',
+      cidade: '',
+      estado: 'SP',
+      responsavel: '',
+      status: 'Ativa',
+    },
+  });
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -24,29 +47,28 @@ export function NovaUnidadeModal({ open, onClose, onSave }: NovaUnidadeModalProp
       window.addEventListener('keydown', handleKeyDown);
     } else {
       document.body.style.overflow = '';
+      reset();
     }
     return () => {
       document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [open, onClose]);
+  }, [open, onClose, reset]);
 
   if (!open) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!nome.trim() || !cidade.trim()) return;
-
+  const onSubmit = (data: NovaUnidadeFormData) => {
     const nova: Centro = {
       id: `cd-${Date.now()}`,
-      nome,
-      cidade,
-      estado,
-      responsavel: responsavel || 'Não definido',
-      status,
+      nome: data.nome,
+      cidade: data.cidade,
+      estado: data.estado,
+      responsavel: data.responsavel,
+      status: data.status,
     };
 
     onSave(nova);
+    reset();
     onClose();
   };
 
@@ -68,18 +90,28 @@ export function NovaUnidadeModal({ open, onClose, onSave }: NovaUnidadeModalProp
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <div className="drawer-content" style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <label className="field-label" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <span style={{ fontSize: '11px', fontWeight: 600, color: '#688275', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Nome da Unidade</span>
               <input
                 type="text"
                 placeholder="Ex: CD Campinas, Filial Curitiba"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                required
-                style={{ height: '38px', padding: '0 12px', borderRadius: '8px', border: '1px solid #dbe2dd', background: '#fff', fontSize: '13px' }}
+                {...register('nome')}
+                style={{
+                  height: '38px',
+                  padding: '0 12px',
+                  borderRadius: '8px',
+                  border: errors.nome ? '1px solid #b02a37' : '1px solid #dbe2dd',
+                  background: errors.nome ? '#fffbfb' : '#fff',
+                  fontSize: '13px',
+                }}
               />
+              {errors.nome && (
+                <span style={{ color: '#b02a37', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <AlertCircle size={12} /> {errors.nome.message}
+                </span>
+              )}
             </label>
 
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '14px' }}>
@@ -88,18 +120,27 @@ export function NovaUnidadeModal({ open, onClose, onSave }: NovaUnidadeModalProp
                 <input
                   type="text"
                   placeholder="Ex: Campinas"
-                  value={cidade}
-                  onChange={(e) => setCidade(e.target.value)}
-                  required
-                  style={{ height: '38px', padding: '0 12px', borderRadius: '8px', border: '1px solid #dbe2dd', background: '#fff', fontSize: '13px' }}
+                  {...register('cidade')}
+                  style={{
+                    height: '38px',
+                    padding: '0 12px',
+                    borderRadius: '8px',
+                    border: errors.cidade ? '1px solid #b02a37' : '1px solid #dbe2dd',
+                    background: errors.cidade ? '#fffbfb' : '#fff',
+                    fontSize: '13px',
+                  }}
                 />
+                {errors.cidade && (
+                  <span style={{ color: '#b02a37', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <AlertCircle size={12} /> {errors.cidade.message}
+                  </span>
+                )}
               </label>
 
               <label className="field-label" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <span style={{ fontSize: '11px', fontWeight: 600, color: '#688275', textTransform: 'uppercase', letterSpacing: '0.04em' }}>UF</span>
                 <select
-                  value={estado}
-                  onChange={(e) => setEstado(e.target.value)}
+                  {...register('estado')}
                   style={{ height: '38px', padding: '0 10px', borderRadius: '8px', border: '1px solid #dbe2dd', background: '#fff', fontSize: '13px' }}
                 >
                   {['SP', 'MG', 'RJ', 'SC', 'PR', 'RS', 'GO', 'BA', 'ES', 'PE'].map((uf) => (
@@ -115,23 +156,31 @@ export function NovaUnidadeModal({ open, onClose, onSave }: NovaUnidadeModalProp
                 <input
                   type="text"
                   placeholder="Nome do gestor"
-                  value={responsavel}
-                  onChange={(e) => setResponsavel(e.target.value)}
-                  required
-                  style={{ height: '38px', padding: '0 12px', borderRadius: '8px', border: '1px solid #dbe2dd', background: '#fff', fontSize: '13px' }}
+                  {...register('responsavel')}
+                  style={{
+                    height: '38px',
+                    padding: '0 12px',
+                    borderRadius: '8px',
+                    border: errors.responsavel ? '1px solid #b02a37' : '1px solid #dbe2dd',
+                    background: errors.responsavel ? '#fffbfb' : '#fff',
+                    fontSize: '13px',
+                  }}
                 />
+                {errors.responsavel && (
+                  <span style={{ color: '#b02a37', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <AlertCircle size={12} /> {errors.responsavel.message}
+                  </span>
+                )}
               </label>
 
               <label className="field-label" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <span style={{ fontSize: '11px', fontWeight: 600, color: '#688275', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Status Inicial</span>
                 <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value as any)}
+                  {...register('status')}
                   style={{ height: '38px', padding: '0 10px', borderRadius: '8px', border: '1px solid #dbe2dd', background: '#fff', fontSize: '13px' }}
                 >
-                  <option value="Operando">Operando</option>
-                  <option value="Em expansão">Em expansão</option>
-                  <option value="Em implantação">Em implantação</option>
+                  <option value="Ativa">Ativa</option>
+                  <option value="Inativa">Inativa</option>
                 </select>
               </label>
             </div>

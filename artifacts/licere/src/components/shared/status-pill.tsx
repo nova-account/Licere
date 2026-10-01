@@ -5,8 +5,10 @@ export function StatusPill({ status }: { status: Status | string }) {
   const tone =
     status === 'Regular' ||
       status === 'Vigente' ||
+      status === 'Válido' ||
       status === 'Concluída' ||
-      status === 'Operando'
+      status === 'Operando' ||
+      status === 'Ativa'
       ? 'good'
       : status === 'Em análise' ||
         status === 'Em expansão' ||
@@ -14,7 +16,7 @@ export function StatusPill({ status }: { status: Status | string }) {
         ? 'notice'
         : status === 'Pendente'
           ? 'warn'
-          : status === 'A vencer'
+          : status === 'A vencer' || status === 'Próximo do vencimento'
             ? 'orange'
             : 'bad';
 

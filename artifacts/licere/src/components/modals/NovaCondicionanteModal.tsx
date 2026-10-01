@@ -175,7 +175,7 @@ export function NovaCondicionanteModal({ open, onClose, onSave, licencas = initi
                 <span style={{ fontSize: '11px', fontWeight: 600, color: '#688275', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Status Inicial</span>
                 <select
                   value={status}
-                  onChange={(e) => setStatus(e.target.value as any)}
+                  onChange={(e) => setStatus(e.target.value as Condicionante['status'])}
                   style={{ height: '38px', padding: '0 10px', borderRadius: '8px', border: '1px solid #dbe2dd', background: '#fff', fontSize: '13px' }}
                 >
                   <option value="Pendente">Pendente</option>

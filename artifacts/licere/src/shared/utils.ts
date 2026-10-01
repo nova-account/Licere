@@ -1,27 +1,27 @@
 import { Status } from './types';
 
-export function getDocumentStatus(validade: string): Status {
-  if (!validade || validade === 'Indeterminada' || validade === 'Permanente') return 'Vigente';
+export function getDocumentStatus(validade: string): 'Válido' | 'Próximo do vencimento' | 'Expirado' {
+  if (!validade || validade === 'Indeterminada' || validade === 'Permanente') return 'Válido';
   
   const [y, m, d] = validade.split('-');
-  if (!y || !m || !d) return 'Vigente';
+  if (!y || !m || !d) return 'Válido';
   
   const expDate = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   
   if (expDate < today) {
-    return 'Expirada';
+    return 'Expirado';
   }
   
   const diffTime = expDate.getTime() - today.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
   
   if (diffDays <= 15) {
-    return 'A vencer';
+    return 'Próximo do vencimento';
   }
   
-  return 'Vigente';
+  return 'Válido';
 }
 
 export function formatDateBr(value: string): string {

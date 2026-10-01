@@ -1,8 +1,8 @@
 import React from 'react';
 import { ChevronDown, Filter, ListFilter, Plus, Search, X } from 'lucide-react';
 import { Mark } from '@/shared/ui';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-/** Retorna o valor inicial de busca. No export estático, sempre retorna vazio. */
 export function useQuerySearch() {
   return '';
 }
@@ -43,23 +43,22 @@ export function FilterBar({
       </label>
 
       <div className="filter-actions">
-        <label className="select-wrap">
-          <Filter size={15} />
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            aria-label="filtrar itens"
-            data-testid="select-filter"
-          >
-            <option value="Todos">Todos</option>
+        <Select value={filter} onValueChange={setFilter}>
+          <SelectTrigger className="select-wrap custom-shadcn-trigger" aria-label="filtrar itens" data-testid="select-filter">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+              <Filter size={15} />
+              <SelectValue />
+            </div>
+          </SelectTrigger>
+          <SelectContent position="popper" sideOffset={4}>
+            <SelectItem value="Todos">Todos</SelectItem>
             {options.map((option) => (
-              <option key={option} value={option}>
+              <SelectItem key={option} value={option}>
                 {option}
-              </option>
+              </SelectItem>
             ))}
-          </select>
-          <ChevronDown size={14} />
-        </label>
+          </SelectContent>
+        </Select>
 
         <button
           className="filter-btn"

@@ -1,0 +1,60 @@
+/* ── Activity feed ── */
+.activity-list {
+  margin-top: 16px;
+}
+
+.activity-list > div {
+  display: flex;
+  gap: 9px;
+  padding: 11px 0;
+  border-top: 1px solid #e4ebec;
+}
+
+.activity-list > div:first-child {
+  border-top: 0;
+}
+
+.activity-avatar {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  font: 700 9px var(--app-font-mono);
+}
+
+.avatar-olive {
+  color: #3c624d;
+  background: #dde9df;
+}
+
+.avatar-sand {
+  color: #5c7780;
+  background: #e4edf0;
+}
+
+.avatar-blue {
+  color: #5f6e9a;
+  background: #e8eaf4;
+}
+
+.activity-list p {
+  margin: 0;
+  color: #778b90;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.activity-list p b,
+.activity-list p strong {
+  color: #355b4b;
+  font-weight: 600;
+}
+
+.activity-list p small {
+  display: block;
+  margin-top: 3px;
+  color: #a0a69f;
+  font-size: 9px;
+}

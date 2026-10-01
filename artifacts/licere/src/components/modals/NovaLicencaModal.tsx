@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, ShieldCheck } from 'lucide-react';
 import type { Licenca } from '@/shared/types';
-import { centros } from '@/shared/data';
+import { useAppData } from '@/lib/AppDataContext';
 
 interface NovaLicencaModalProps {
   open: boolean;
@@ -10,9 +10,11 @@ interface NovaLicencaModalProps {
 }
 
 export function NovaLicencaModal({ open, onClose, onSave }: NovaLicencaModalProps) {
+  const { centros } = useAppData();
+  const activeCentros = centros.filter((c) => c.status === 'Ativa');
   const [tipo, setTipo] = useState('Licença de Operação');
   const [numero, setNumero] = useState('');
-  const [centroId, setCentroId] = useState(centros[0]?.id || 'cd-sp');
+  const [centroId, setCentroId] = useState(activeCentros[0]?.id || centros[0]?.id || 'cd-sp');
   const [orgao, setOrgao] = useState('CETESB');
   const [emissao, setEmissao] = useState(new Date().toISOString().split('T')[0]);
   const [vencimento, setVencimento] = useState('');
@@ -165,7 +167,7 @@ export function NovaLicencaModal({ open, onClose, onSave }: NovaLicencaModalProp
                 <span style={{ fontSize: '11px', fontWeight: 600, color: '#688275', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Criticidade</span>
                 <select
                   value={criticidade}
-                  onChange={(e) => setCriticidade(e.target.value as any)}
+                  onChange={(e) => setCriticidade(e.target.value as Licenca['criticidade'])}
                   style={{ height: '38px', padding: '0 10px', borderRadius: '8px', border: '1px solid #dbe2dd', background: '#fff', fontSize: '13px' }}
                 >
                   <option value="Alta">Alta</option>
@@ -178,7 +180,7 @@ export function NovaLicencaModal({ open, onClose, onSave }: NovaLicencaModalProp
                 <span style={{ fontSize: '11px', fontWeight: 600, color: '#688275', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Status Inicial</span>
                 <select
                   value={status}
-                  onChange={(e) => setStatus(e.target.value as any)}
+                  onChange={(e) => setStatus(e.target.value as Licenca['status'])}
                   style={{ height: '38px', padding: '0 10px', borderRadius: '8px', border: '1px solid #dbe2dd', background: '#fff', fontSize: '13px' }}
                 >
                   <option value="Vigente">Vigente</option>

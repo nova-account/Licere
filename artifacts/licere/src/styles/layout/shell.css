@@ -1,0 +1,108 @@
+/* ── App shell ── */
+.app-shell {
+  min-height: 100dvh;
+  display: flex;
+  background: #f8f9fa;
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  background: #f8f9fa;
+}
+
+/* ── Content wrapper ── */
+.content {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 52px 48px 84px;
+  background: #f8f9fa;
+}
+
+/* ── Page header ── */
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 31px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #7d9296;
+  font: 10px var(--app-font-mono);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+/* Hide eyebrow inside page headers — kept as utility class elsewhere */
+.page-header .eyebrow {
+  display: none;
+}
+
+.page-header h1 {
+  margin: 0;
+  color: #14271f;
+  font:
+    800 clamp(31px, 3.1vw, 44px) / 1.1 "Manrope",
+    sans-serif;
+  letter-spacing: -0.075em;
+}
+
+.page-description {
+  max-width: 580px;
+  margin: 9px 0 0;
+  color: #74868a;
+  font-size: 13px;
+}
+
+/* ── Text link ── */
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: #1b6848;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.text-link:hover {
+  text-decoration: underline;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+  .content {
+    padding-right: 28px;
+    padding-left: 28px;
+  }
+}
+
+@media (max-width: 760px) {
+  .content {
+    padding: 24px 18px 74px;
+  }
+
+  .page-header {
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 17px;
+  }
+
+  .page-header h1 {
+    font-size: 30px;
+    line-height: 1.1;
+  }
+
+  .page-header button,
+  .page-header .primary-btn {
+    align-self: flex-end;
+  }
+
+  .page-description {
+    font-size: 14px;
+  }
+}

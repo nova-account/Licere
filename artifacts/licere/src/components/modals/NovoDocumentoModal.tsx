@@ -1,7 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { X, Save, FolderOpen, UploadCloud } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { X, Save, FolderOpen, UploadCloud, AlertCircle } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import type { Documento } from '@/shared/types';
-import { centros, initialLicencas } from '@/shared/data';
+import { useAppData } from '@/lib/AppDataContext';
+
+const novoDocumentoSchema = z.object({
+  nome: z.string().min(3, 'O nome do documento deve ter pelo menos 3 caracteres.'),
+  categoria: z.enum(['Relatórios', 'Licenças', 'Protocolos', 'Plantas', 'Laudos']),
+  centroId: z.string().min(1, 'Selecione a unidade correspondente.'),
+  validade: z.string().min(1, 'A data de validade é obrigatória.'),
+});
+
+type NovoDocumentoFormData = z.infer<typeof novoDocumentoSchema>;
 
 interface NovoDocumentoModalProps {
   open: boolean;
@@ -10,10 +22,32 @@ interface NovoDocumentoModalProps {
 }
 
 export function NovoDocumentoModal({ open, onClose, onSave }: NovoDocumentoModalProps) {
-  const [nome, setNome] = useState('');
-  const [categoria, setCategoria] = useState<'Relatórios' | 'Licenças' | 'Protocolos' | 'Plantas' | 'Laudos'>('Relatórios');
-  const [centroId, setCentroId] = useState(centros[0]?.id || 'cd-sp');
-  const [validade, setValidade] = useState('2026-12-31');
+  const { centros, licencas } = useAppData();
+  const activeCentros = centros.filter((c) => c.status === 'Ativa');
+  const defaultCentro = activeCentros[0] || centros[0];
+  const [inactiveError, setInactiveError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<NovoDocumentoFormData>({
+    resolver: zodResolver(novoDocumentoSchema),
+    defaultValues: {
+      nome: '',
+      categoria: 'Relatórios',
+      centroId: defaultCentro?.id || '',
+      validade: '2026-12-31',
+    },
+  });
+
+  useEffect(() => {
+    if (defaultCentro) {
+      setValue('centroId', defaultCentro.id);
+    }
+  }, [defaultCentro, setValue]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -24,31 +58,39 @@ export function NovoDocumentoModal({ open, onClose, onSave }: NovoDocumentoModal
       window.addEventListener('keydown', handleKeyDown);
     } else {
       document.body.style.overflow = '';
+      reset();
+      setInactiveError(null);
     }
     return () => {
       document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [open, onClose]);
+  }, [open, onClose, reset]);
 
   if (!open) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!nome.trim()) return;
+  const onSubmit = (data: NovoDocumentoFormData) => {
+    setInactiveError(null);
+
+    const selectedCentro = centros.find((c) => c.id === data.centroId);
+    if (selectedCentro?.status === 'Inativa') {
+      setInactiveError('Unidades inativas não podem receber novos documentos ou evidências.');
+      return;
+    }
 
     const novo: Documento = {
       id: `doc-${Date.now()}`,
-      nome: nome.endsWith('.pdf') ? nome : `${nome}.pdf`,
-      categoria,
-      centroId,
-      licencaId: initialLicencas.find((l) => l.centroId === centroId)?.id,
+      nome: data.nome.endsWith('.pdf') ? data.nome : `${data.nome}.pdf`,
+      categoria: data.categoria,
+      centroId: data.centroId,
+      licencaId: licencas.find((l) => l.centroId === data.centroId)?.id,
       tamanho: '2.1 MB',
       atualizadoEm: new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
-      validade: validade || 'Permanente',
+      validade: data.validade || 'Permanente',
     };
 
     onSave(novo);
+    reset();
     onClose();
   };
 
@@ -70,26 +112,42 @@ export function NovoDocumentoModal({ open, onClose, onSave }: NovoDocumentoModal
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <div className="drawer-content" style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {inactiveError && (
+              <div style={{ padding: '10px 12px', background: '#fdeded', border: '1px solid #f5c2c7', borderRadius: '6px', color: '#b02a37', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <AlertCircle size={15} />
+                <span>{inactiveError}</span>
+              </div>
+            )}
+
             <label className="field-label" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <span style={{ fontSize: '11px', fontWeight: 600, color: '#688275', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Nome do Arquivo ou Documento</span>
               <input
                 type="text"
                 placeholder="Ex: Laudo_Analise_Agua_2025.pdf"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                required
-                style={{ height: '38px', padding: '0 12px', borderRadius: '8px', border: '1px solid #dbe2dd', background: '#fff', fontSize: '13px' }}
+                {...register('nome')}
+                style={{
+                  height: '38px',
+                  padding: '0 12px',
+                  borderRadius: '8px',
+                  border: errors.nome ? '1px solid #b02a37' : '1px solid #dbe2dd',
+                  background: errors.nome ? '#fffbfb' : '#fff',
+                  fontSize: '13px',
+                }}
               />
+              {errors.nome && (
+                <span style={{ color: '#b02a37', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <AlertCircle size={12} /> {errors.nome.message}
+                </span>
+              )}
             </label>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
               <label className="field-label" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <span style={{ fontSize: '11px', fontWeight: 600, color: '#688275', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Categoria</span>
                 <select
-                  value={categoria}
-                  onChange={(e) => setCategoria(e.target.value as any)}
+                  {...register('categoria')}
                   style={{ height: '38px', padding: '0 10px', borderRadius: '8px', border: '1px solid #dbe2dd', background: '#fff', fontSize: '13px' }}
                 >
                   <option value="Relatórios">Relatórios</option>
@@ -101,16 +159,22 @@ export function NovoDocumentoModal({ open, onClose, onSave }: NovoDocumentoModal
               </label>
 
               <label className="field-label" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 600, color: '#688275', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Unidade Vinculada</span>
+                <span style={{ fontSize: '11px', fontWeight: 600, color: '#688275', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Unidade (Apenas ativas)</span>
                 <select
-                  value={centroId}
-                  onChange={(e) => setCentroId(e.target.value)}
+                  {...register('centroId')}
                   style={{ height: '38px', padding: '0 10px', borderRadius: '8px', border: '1px solid #dbe2dd', background: '#fff', fontSize: '13px' }}
                 >
                   {centros.map((c) => (
-                    <option key={c.id} value={c.id}>{c.nome}</option>
+                    <option key={c.id} value={c.id} disabled={c.status === 'Inativa'}>
+                      {c.nome} {c.status === 'Inativa' ? '(Inativa - Bloqueada)' : ''}
+                    </option>
                   ))}
                 </select>
+                {errors.centroId && (
+                  <span style={{ color: '#b02a37', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <AlertCircle size={12} /> {errors.centroId.message}
+                  </span>
+                )}
               </label>
             </div>
 
@@ -118,10 +182,21 @@ export function NovoDocumentoModal({ open, onClose, onSave }: NovoDocumentoModal
               <span style={{ fontSize: '11px', fontWeight: 600, color: '#688275', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Validade do Documento</span>
               <input
                 type="date"
-                value={validade}
-                onChange={(e) => setValidade(e.target.value)}
-                style={{ height: '38px', padding: '0 12px', borderRadius: '8px', border: '1px solid #dbe2dd', background: '#fff', fontSize: '13px' }}
+                {...register('validade')}
+                style={{
+                  height: '38px',
+                  padding: '0 12px',
+                  borderRadius: '8px',
+                  border: errors.validade ? '1px solid #b02a37' : '1px solid #dbe2dd',
+                  background: errors.validade ? '#fffbfb' : '#fff',
+                  fontSize: '13px',
+                }}
               />
+              {errors.validade && (
+                <span style={{ color: '#b02a37', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <AlertCircle size={12} /> {errors.validade.message}
+                </span>
+              )}
             </label>
 
             <div style={{ padding: '16px', borderRadius: '8px', border: '1px dashed #c4d4cc', background: '#f8faf9', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
