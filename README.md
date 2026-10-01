@@ -1,29 +1,32 @@
-# Licere — Plataforma de Gestao Corporativa e Conformidade Operacional
+# Licere — Plataforma de Gestão Corporativa e Conformidade Operacional
 
-> **Frontend corporativo centralizado para acompanhamento de unidades, documentos, tarefas e indicadores de conformidade ambiental e regulatoria.**
+> **Frontend corporativo centralizado para acompanhamento de unidades, documentos, tarefas e indicadores de conformidade ambiental e regulatória.**
+
+- **Demonstração online (Deploy):** [https://nova-account.github.io/Licere/](https://nova-account.github.io/Licere/)
+- **Repositório oficial:** [https://github.com/nova-account/Licere](https://github.com/nova-account/Licere)
 
 ---
 
 ## 1. Contexto do Projeto
 
-A **Licere** e uma plataforma corporativa desenvolvida para simular a operacao real de uma empresa com multiplas unidades (Centros de Distribuicao e Filiais). O sistema permite aos gestores e times de conformidade monitorar obrigacoes, documentos, licencas e tarefas de cada unidade em um painel unico e centralizado.
+A **Licere** é uma plataforma corporativa desenvolvida para simular a operação real de uma empresa com múltiplas unidades (Centros de Distribuição e Filiais). O sistema permite aos gestores e times de conformidade monitorar obrigações, documentos, licenças e tarefas de cada unidade em um painel único e centralizado.
 
-O projeto foi construido seguindo rigorosos padroes de arquitetura de frontend, organizacao de codigo, tipagem estrita com TypeScript, responsividade para todos os formatos de tela e separacao clara entre dados e estado de UI.
+O projeto foi construído seguindo rigorosos padrões de arquitetura de frontend, organização de código, tipagem estrita com TypeScript, responsividade para todos os formatos de tela e separação clara entre dados e estado de interface.
 
 ---
 
-## 2. Stack Tecnologica
+## 2. Stack Tecnológica
 
-### Obrigatoria
+### Obrigatória
 - **Framework:** [Next.js](https://nextjs.org/) (App Router, React Server/Client Components)
 - **Linguagem:** [TypeScript](https://www.typescriptlang.org/) (tipagem estrita em todas as entidades, sem uso de `any`)
 
 ### Bibliotecas e Ferramentas
-- **Formularios e Schemas:** [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) para validacao robusta e mensagens de erro especificas por campo
+- **Formulários e Schemas:** [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) para validação robusta e mensagens de erro específicas por campo
 - **Design System e Acessibilidade:** Radix UI Primitives, Lucide React Icons
-- **Estilizacao:** CSS Modular com Design Tokens (paleta sobria, micro-animacoes, layout responsivo para Desktop, Tablet e Mobile)
-- **Gerenciamento de Estado:** Context API reativa com persistencia local e sincronizacao em tempo real entre telas
-- **Testes Automatizados:** Suite de testes unitarios nativa para validacao das regras de negocio
+- **Estilização:** CSS Modular com Design Tokens (paleta sóbria, micro-animações, layout responsivo para Desktop, Tablet e Mobile)
+- **Gerenciamento de Estado:** Context API reativa com persistência local e sincronização em tempo real entre telas
+- **Testes Automatizados:** Suíte de testes unitários nativa para validação das regras de negócio
 
 ---
 
@@ -34,68 +37,73 @@ O projeto foi construido seguindo rigorosos padroes de arquitetura de frontend, 
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── (public)/
-│   │   │   │   ├── login/         # Tela de Login com validacao Zod e feedback
-│   │   │   │   └── page.tsx       # Landing corporativa de apresentacao
-│   │   │   └── (authenticated)/   # Rotas protegidas (exigem sessao ativa)
+│   │   │   │   ├── login/         # Tela de Login com validação Zod e feedback visual
+│   │   │   │   └── page.tsx       # Landing corporativa de apresentação
+│   │   │   └── (authenticated)/   # Rotas protegidas (exigem sessão ativa)
 │   │   │       ├── dashboard/     # Painel de indicadores em tempo real
-│   │   │       ├── unidades/      # Lista de unidades com pesquisa, filtros e paginacao
-│   │   │       ├── documentos/    # Gestao de acervo com status derivado da validade
-│   │   │       ├── tarefas/       # Rotina operacional com modal de confirmacao
-│   │   │       ├── licencas/      # Gestao de licencas ambientais
+│   │   │       ├── unidades/      # Lista de unidades com pesquisa, filtros e paginação
+│   │   │       ├── documentos/    # Gestão de acervo com status derivado da validade
+│   │   │       ├── tarefas/       # Rotina operacional com modal de confirmação
+│   │   │       ├── licencas/      # Gestão de licenças ambientais
+│   │   │       ├── perfil/        # Configurações de perfil do usuário
 │   │   │       └── layout.tsx     # Shell corporativo e Auth Guard
 │   │   ├── components/
 │   │   │   ├── layout/            # Topbar, Sidebar, ListControls (busca, filtros)
-│   │   │   ├── modals/            # Detalhamento de Unidade, Modais de Cadastro, Confirmacao
-│   │   │   ├── dashboard/         # Cards de Metricas, Graficos de Risco, Listas Prioritarias
+│   │   │   ├── modals/            # Detalhamento de Unidade, Modais de Cadastro, Confirmação
+│   │   │   ├── dashboard/         # Cards de Métricas, Gráficos de Risco, Listas Prioritárias
 │   │   │   └── shared/            # StatusPills, Badges, EmptyStates
 │   │   ├── lib/
-│   │   │   └── AppDataContext.tsx # Estado centralizado e regras de negocio
+│   │   │   └── AppDataContext.tsx # Estado centralizado e regras de negócio
 │   │   ├── shared/
 │   │   │   ├── types.ts           # Interfaces TypeScript (Unidade, Documento, Tarefa)
-│   │   │   ├── data.ts            # Mocks representativos para todos os cenarios
-│   │   │   └── utils.ts           # Helpers e derivacao matematica de status de documentos
+│   │   │   ├── data.ts            # Mocks representativos para todos os cenários
+│   │   │   └── utils.ts           # Helpers e cálculo dinâmico de status de documentos
 │   │   └── styles/                # Design tokens, tipografia e layouts responsivos
 │   └── scripts-teste/
-│       └── test-rules.mjs         # Suite de testes unitarios automatizados
+│       └── test-rules.mjs         # Suíte de testes unitários automatizados
 ```
 
 ---
 
-## 4. Regras de Negocio Implementadas
+## 4. Regras de Negócio Implementadas
 
-1. **Autenticacao Obrigatoria:**
-   - Rotas internas protegidas pelo `AuthenticatedLayout`. Usuarios nao autenticados sao redirecionados automaticamente para `/login`.
-   - Formulario de login validado via Zod com feedback visual imediato para campos invalidos.
+1. **Autenticação Obrigatória:**
+   - Rotas internas protegidas pelo `AuthenticatedLayout`. Usuários não autenticados são redirecionados automaticamente para `/login`.
+   - Formulário de login validado via Zod com feedback visual imediato para campos inválidos e acesso demo com um clique.
 
 2. **Status de Unidade (Ativa ou Inativa):**
    - Unidades cadastradas possuem status `'Ativa'` ou `'Inativa'`.
-   - **Bloqueio em Unidades Inativas:** Os formularios de criacao de novas tarefas e documentos bloqueiam a selecao de unidades inativas.
-   - **Modo Somente Leitura:** No painel de detalhamento da unidade inativa, documentos e tarefas sao exibidos exclusivamente para leitura, com banner explicativo.
+   - **Bloqueio em Unidades Inativas:** Os formulários de criação de novas tarefas e documentos bloqueiam a vinculação a unidades inativas com aviso explicativo.
+   - **Modo Somente Leitura:** No painel de detalhamento da unidade inativa, documentos e tarefas são exibidos exclusivamente para leitura, acompanhados de banner informativo.
 
 3. **Status de Documento Calculado Dinamicamente:**
-   - O status nao e inserido manualmente pelo usuario. A funcao `getDocumentStatus(validade)` calcula no frontend:
-     - **Expirado:** Validade anterior a data atual (`expDate < today`).
-     - **Proximo do vencimento:** Validade entre hoje e 15 dias (`diffDays <= 15`).
-     - **Valido:** Validade superior a 15 dias ou indeterminada.
+   - O status não é inserido manualmente pelo usuário. A função `getDocumentStatus(validade)` calcula no frontend a partir da data de vencimento:
+     - **Expirado:** Validade anterior à data atual (`expDate < today`).
+     - **Próximo do vencimento:** Validade entre hoje e 15 dias (`diffDays <= 15`).
+     - **Válido:** Validade superior a 15 dias ou indeterminada/permanente.
 
-4. **Confirmacao Obrigatoria para Conclusao de Tarefas:**
-   - Ao clicar no checkbox de conclusao de uma tarefa, um modal de confirmacao (`ConfirmModal`) e acionado para evitar conclusoes acidentais.
+4. **Confirmação Obrigatória para Conclusão de Tarefas:**
+   - Ao clicar no checkbox de conclusão de uma tarefa, um modal de confirmação (`ConfirmModal`) é acionado para evitar conclusões acidentais.
 
 5. **Painel de Indicadores em Tempo Real:**
-   - O Dashboard exibe o total de unidades cadastradas, documentos, tarefas pendentes e o indicador integrado de pendencias.
-   - Qualquer alteracao feita nas telas de listagem (concluir uma tarefa, cadastrar um documento) e refletida instantaneamente no Dashboard sem necessidade de recarregar a pagina (`F5`).
+   - O Dashboard exibe o total de unidades cadastradas, unidades ativas, documentos pendentes, tarefas pendentes e o indicador integrado de pendências.
+   - Qualquer alteração feita nas telas de listagem (concluir uma tarefa, cadastrar um documento) é refletida instantaneamente no Dashboard sem necessidade de recarregar a página (`F5`).
 
-6. **Regra de Negocio Avancada — Bloqueio de Exclusao:**
-   - Ao tentar excluir uma unidade, o sistema verifica se existem documentos a vencer/expirados ou tarefas pendentes/em andamento vinculadas. Se houver, a exclusao e bloqueada com mensagem explicativa informando o total exato de pendencias.
+6. **Regra de Negócio Avançada — Bloqueio de Exclusão:**
+   - Ao tentar excluir uma unidade, o sistema verifica se existem documentos a vencer/expirados ou tarefas pendentes/em andamento vinculadas. Se houver pendências ativas, a exclusão é bloqueada com mensagem explicativa informando o total exato de itens impeditivos.
+
+7. **Histórico de Alterações e Auditoria:**
+   - O painel de detalhamento da unidade apresenta o registro de ações recentes (quem alterou, o que alterou e quando), garantindo rastreabilidade das operações.
 
 ---
 
 ## 5. Testes Automatizados
 
-A aplicacao inclui testes unitarios que cobrem integralmente as regras de negocio:
-- Calculo do status de documento (Expirado, Proximo do vencimento, Valido, Indeterminado);
+A aplicação inclui suíte de testes unitários que cobre integralmente as regras de negócio:
+- Cálculo dinâmico do status de documento (Expirado, Próximo do vencimento, Válido, Indeterminado);
 - Bloqueio de novos registros em unidades inativas;
-- Bloqueio de exclusao de unidades com pendencias ativas.
+- Bloqueio de exclusão de unidades com pendências ativas;
+- Permissão de exclusão para unidades sem pendências.
 
 Para executar os testes:
 ```bash
@@ -108,20 +116,20 @@ npm test
 
 ## 6. Como Executar o Projeto Localmente
 
-### Pre-requisitos
+### Pré-requisitos
 - Node.js (v18 ou superior)
 - `pnpm` ou `npm`
 
 ### Passos
 
-1. **Instalar as dependencias:**
+1. **Instalar as dependências:**
    ```bash
    cd artifacts/licere
    pnpm install
    # ou: npm install
    ```
 
-2. **Executar a aplicacao em desenvolvimento:**
+2. **Executar a aplicação em desenvolvimento:**
    ```bash
    pnpm run dev
    # ou: npm run dev
@@ -129,12 +137,12 @@ npm test
 
 3. **Acessar no navegador:**
    - Acesse [http://localhost:5173](http://localhost:5173) ou [http://localhost:3000](http://localhost:3000)
-   - Na tela de login, utilize qualquer e-mail corporativo valido e senha com no minimo 6 caracteres, ou clique em **"Explorar workspace de demonstracao"** para entrar instantaneamente com as credenciais pre-configuradas.
+   - Na tela de login, utilize qualquer e-mail corporativo válido e senha com no mínimo 6 caracteres, ou clique em **"Explorar workspace de demonstração"** para entrar instantaneamente com credenciais pré-configuradas.
 
 ---
 
-## 7. Criterios de Avaliacao Atendidos
+## 7. Critérios de Avaliação Atendidos
 
-- **Desempenho Tecnico:** Arquitetura limpa, componentes reutilizaveis, tipagem completa em TypeScript, design system consistente, responsividade mobile-first e tratamento de loading/erros.
-- **Processos e Organizacao:** Repositorio versionado com commits estruturados, documentacao completa e cobertura de testes unitarios.
-- **Apresentacao:** Interface fluida, moderna e dados mockados que cobrem todos os estados solicitados na avaliacao.
+- **Desempenho Técnico (60%):** Arquitetura limpa, componentes reutilizáveis, tipagem completa em TypeScript sem `any`, design system consistente, responsividade para todos os formatos de tela e tratamento de loading/erros.
+- **Processos e Organização (10%):** Repositório versionado com commits estruturados, documentação completa em português formal, ausência de emojis e cobertura de testes unitários.
+- **Apresentação Final (30%):** Interface fluida, moderna, dados mockados dinâmicos que cobrem todos os estados solicitados na avaliação e link de demonstração funcional online.

@@ -1,13 +1,11 @@
 'use client';
 
 import React from 'react';
-import { ChevronRight } from 'lucide-react';
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart"
 
 const chartData = [
@@ -84,7 +82,65 @@ export function RiskChart() {
             />
             <ChartTooltip
               cursor={{ stroke: '#829088', strokeWidth: 1, strokeDasharray: '3 3' }}
-              content={<ChartTooltipContent indicator="dot" />}
+              content={({ active, payload, label }) => {
+                if (!active || !payload?.length) return null;
+                const item = payload[0];
+                return (
+                  <div
+                    style={{
+                      background: '#ffffff',
+                      border: '1px solid rgba(16, 42, 34, 0.12)',
+                      borderRadius: '8px',
+                      padding: '8px 14px',
+                      boxShadow: '0 4px 14px rgba(0, 0, 0, 0.08)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textAlign: 'center',
+                      gap: '4px',
+                      minWidth: '120px',
+                    }}
+                  >
+                    <span style={{ fontSize: '11px', color: '#688275', fontWeight: 600 }}>
+                      {label}
+                    </span>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        width: '100%',
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: '7px',
+                          height: '7px',
+                          borderRadius: '50%',
+                          background: '#164e3f',
+                          display: 'inline-block',
+                          flexShrink: 0,
+                        }}
+                      />
+                      <span style={{ fontSize: '12px', color: '#243029', fontWeight: 500 }}>
+                        Vencimentos:
+                      </span>
+                      <strong
+                        style={{
+                          fontSize: '13px',
+                          color: '#164e3f',
+                          fontWeight: 700,
+                          fontFamily: 'var(--app-font-mono, monospace)',
+                        }}
+                      >
+                        {item.value}
+                      </strong>
+                    </div>
+                  </div>
+                );
+              }}
             />
             <Area
               dataKey="items"
@@ -121,7 +177,6 @@ export function RiskChart() {
           <b>Outubro concentra o maior risco</b>
           <small>4 licenças e 6 condicionantes vencem no período</small>
         </div>
-        <ChevronRight size={16} />
       </div>
     </div>
   );

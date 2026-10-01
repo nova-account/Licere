@@ -643,8 +643,9 @@
 
 @media (max-width: 800px) {
   .public-header {
-    width: calc(100% - 36px);
+    width: calc(100% - 32px);
     padding: 18px 0;
+    box-sizing: border-box;
   }
 
   .public-header nav > a:not(.public-login) {
@@ -657,6 +658,8 @@
   .hero-enterprise {
     padding: 28px 0 44px;
     gap: 32px;
+    width: calc(100% - 32px);
+    box-sizing: border-box;
   }
 
   .hero-badge {
@@ -741,12 +744,17 @@
 
   /* Bento */
   .bento-section {
-    margin: 56px auto;
+    width: calc(100% - 32px);
+    margin: 48px auto;
+    padding: 0;
+    box-sizing: border-box;
   }
 
   .bento-grid {
     grid-template-columns: 1fr;
     gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .bento-wide {
@@ -754,17 +762,53 @@
   }
 
   .bento-card {
-    padding: 24px;
+    padding: 24px 18px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .bento-preview-graphic {
+    padding: 12px 10px;
+    margin-top: 18px;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    justify-content: space-between;
   }
 
   .timeline-node {
-    padding: 4px 8px;
-    font-size: 9px;
+    padding: 4px 6px;
+    font-size: 8.5px;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .timeline-line {
-    margin: 0 4px;
-    min-width: 12px;
+    margin: 0 3px;
+    min-width: 6px;
+    flex: 1;
+  }
+
+  .bento-pill-cluster {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 18px;
+    width: 100%;
+  }
+
+  .cluster-pill {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 11.5px;
+    padding: 8px 12px;
+    white-space: normal;
+    word-break: break-word;
   }
 
   .section-title {
@@ -778,6 +822,11 @@
   /* Compliance */
   .compliance-section {
     padding: 56px 0;
+  }
+
+  .compliance-inner {
+    width: calc(100% - 32px);
+    box-sizing: border-box;
   }
 
   .audit-stats {

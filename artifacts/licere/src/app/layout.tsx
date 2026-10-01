@@ -4,11 +4,15 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/toaster';
 import '../index.css';
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
 export const metadata: Metadata = {
   title: 'Licere',
-  description: 'Licere - ambiente de compliance operacional.',
+  description: 'Licere - ambiente de compliance e gestão operacional.',
   icons: {
-    icon: '/favicon.svg',
+    icon: `${basePath}/favicon.svg`,
+    shortcut: `${basePath}/favicon.svg`,
+    apple: `${basePath}/favicon.svg`,
   },
 };
 

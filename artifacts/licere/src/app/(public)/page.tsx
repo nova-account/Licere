@@ -101,47 +101,46 @@ export default function HomePage() {
                 <div className="preview-metrics">
                   <div className="preview-metric">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span className="preview-label">Licenças Ativas</span>
-                      <ShieldCheck size={16} color="#6a8277" />
-                    </div>
-                    <strong className="preview-val">48</strong>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-                      <ArrowUpRight size={13} className="text-good" />
-                      <small className="preview-sub text-good" style={{ marginTop: 0 }}>100% conformes</small>
-                    </div>
-                  </div>
-                  <div className="preview-metric">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span className="preview-label">Condicionantes</span>
-                      <ClipboardCheck size={16} color="#6a8277" />
-                    </div>
-                    <strong className="preview-val">142</strong>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-                      <ArrowDownRight size={13} className="text-amber" />
-                      <small className="preview-sub text-amber" style={{ marginTop: 0 }}>3 a protocolar</small>
-                    </div>
-                  </div>
-                  <div className="preview-metric">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span className="preview-label">Unidades</span>
+                      <span className="preview-label">Total de unidades</span>
                       <Building2 size={16} color="#6a8277" />
                     </div>
-                    <strong className="preview-val">5</strong>
+                    <strong className="preview-val">7</strong>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-                      <small className="preview-sub" style={{ marginTop: 0 }}>Em operação total</small>
+                      <small className="preview-sub" style={{ marginTop: 0 }}>5 operando ativas</small>
                     </div>
                   </div>
                   <div className="preview-metric">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span className="preview-label">Documentos</span>
-                      <FileText size={16} color="#6a8277" />
+                      <span className="preview-label">Total de pendências</span>
+                      <ShieldCheck size={16} color="#6a8277" />
                     </div>
-                    <strong className="preview-val">1.4k</strong>
+                    <strong className="preview-val">12</strong>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-                      <small className="preview-sub" style={{ marginTop: 0 }}>Acervo digital</small>
+                      <ArrowDownRight size={13} className="text-amber" />
+                      <small className="preview-sub text-amber" style={{ marginTop: 0 }}>4 docs · 8 tarefas</small>
                     </div>
                   </div>
-                </div>
+                  <div className="preview-metric">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span className="preview-label">Tarefas pendentes</span>
+                      <ClipboardCheck size={16} color="#6a8277" />
+                    </div>
+                    <strong className="preview-val">8</strong>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                      <small className="preview-sub" style={{ marginTop: 0 }}>Em andamento ou pendentes</small>
+                    </div>
+                  </div>
+                  <div className="preview-metric">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span className="preview-label">Total de documentos</span>
+                      <FileText size={16} color="#6a8277" />
+                    </div>
+                    <strong className="preview-val">8</strong>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                      <ArrowUpRight size={13} className="text-good" />
+                      <small className="preview-sub text-good" style={{ marginTop: 0 }}>4 válidos no acervo</small>
+                    </div>
+                  </div></div>
 
                 {/* Mock Live Alert Banner */}
                 <div className="preview-alert">
