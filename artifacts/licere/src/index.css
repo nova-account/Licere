@@ -8,23 +8,28 @@
         Ele inicializa o Tailwind v4 (@import "tailwindcss", @theme, cores e Dark Mode).
         Se você apagar esse arquivo, NENHUMA classe Tailwind funciona no projeto.
 
-   2. [REGRA DE OURO ANTI-CONFLITO NO GIT]:
-      - NÃO APAGUE LINHAS DESTE "index.css" NA SUA BRANCH!
+   2. [PADRÃO DE BRANCHES & REGRA ANTI-CONFLITO NO GIT]:
+      - CADA UM DEVE CRIAR SUA PRÓPRIA BRANCH A PARTIR DA MAIN (NUNCA TRABALHE NA MAIN!):
+        Comando: git checkout -b tailwind/<seu-nome>
+      - NÃO APAGUE LINHAS DESTE "index.css" NA SUA BRANCH:
         Se 7 pessoas apagarem linhas aqui ao mesmo tempo, TODOS os Pull Requests vão
         dar conflito de merge no GitHub.
-      - O QUE FAZER: Quando você terminar de migrar seus componentes para Tailwind,
+      - O QUE FAZER: Quando terminar de migrar seus componentes para Tailwind,
         vá no arquivo .css que você migrou e APENAS ESVAZIE O CONTEÚDO DELE
         (deixe o arquivo vazio ou escreva: // Migrado por Seu Nome).
-      - A limpeza final deste index.css será feita em 1 commit único após os merges.
+      - ANTES DE ABRIR O PULL REQUEST:
+        1. Rode: git pull --rebase origin main (para puxar atualizações sem gerar conflito)
+        2. Rode: npm run typecheck && npm run build
+      - A limpeza final deste index.css será feita em 1 commit único na main após todos os merges.
 
-   3. [DIVISÃO OFICIAL POR MEMBRO]:
-      • PEDRO   ➔ Layout Base (shell.css, sidebar.css, topbar.css)
-      • CLARA   ➔ UI Primitivos (pills.css, buttons.css, empty-state.css)
-      • CHARLYS ➔ Tabelas & Filtros (table.css)
-      • WALLAME ➔ Dashboard Completo (metrics, charts, priority, centers, activity)
-      • YASMIN  ➔ Operação: Tarefas & Unidades (conditions.css, units.css)
-      • LUÍS    ➔ Auth, Landing Page, Perfil & Ajuda (login, public, profile, help)
-      • YARA    ➔ Modais, Drawers e Forms (drawer.css, modal.css, forms.css)
+   3. [DIVISÃO OFICIAL POR MEMBRO & NOME DAS BRANCHES]:
+      • PEDRO   ➔ Branch: tailwind/pedro   | Layout Base (shell.css, sidebar.css, topbar.css)
+      • CLARA   ➔ Branch: tailwind/clara   | UI Primitivos (pills.css, buttons.css, empty-state.css)
+      • CHARLYS ➔ Branch: tailwind/charlys | Tabelas & Filtros (table.css)
+      • WALLAME ➔ Branch: tailwind/wallame | Dashboard Completo (metrics, charts, priority, centers, activity)
+      • YASMIN  ➔ Branch: tailwind/yasmin  | Operação: Tarefas & Unidades (conditions.css, units.css)
+      • LUÍS    ➔ Branch: tailwind/luis    | Auth, Landing Page, Perfil & Ajuda (login, public, profile, help)
+      • YARA    ➔ Branch: tailwind/yara    | Modais, Drawers e Forms (drawer.css, modal.css, forms.css)
 
    4. [PADRÃO OBRIGATÓRIO DE CLASSES TAILWIND (COMO NOMEAR)]:
       • NÃO CRIE CLASSES CSS NOVAS: Use exclusivamente os utilitários padrão do Tailwind v4.
