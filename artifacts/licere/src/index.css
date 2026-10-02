@@ -1,39 +1,122 @@
-/* ─────────────────────────────────────────────
-   Licere — CSS entry point
-   ───────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────────────
+   LICERE — GUIA DE MIGRAÇÃO TAILWIND V4 & REGRAS DA EQUIPE
 
-/* ── Global tokens, Tailwind, reset & animations ── */
+   ⚠️ LEIAM COM ATENÇÃO ANTES DE COMEÇAR (TRABALHO EM PARALELO):
+
+   1. [O QUE NUNCA APAGAR]:
+      - NUNCA APAGUE OU RENOMEIE "./styles/globals.css"!
+        Ele inicializa o Tailwind v4 (@import "tailwindcss", @theme, cores e Dark Mode).
+        Se você apagar esse arquivo, NENHUMA classe Tailwind funciona no projeto.
+
+   2. [REGRA DE OURO ANTI-CONFLITO NO GIT]:
+      - NÃO APAGUE LINHAS DESTE "index.css" NA SUA BRANCH!
+        Se 7 pessoas apagarem linhas aqui ao mesmo tempo, TODOS os Pull Requests vão
+        dar conflito de merge no GitHub.
+      - O QUE FAZER: Quando você terminar de migrar seus componentes para Tailwind,
+        vá no arquivo .css que você migrou e APENAS ESVAZIE O CONTEÚDO DELE
+        (deixe o arquivo vazio ou escreva: // Migrado por Seu Nome).
+      - A limpeza final deste index.css será feita em 1 commit único após os merges.
+
+   3. [DIVISÃO OFICIAL POR MEMBRO]:
+      • PEDRO   ➔ Layout Base (shell.css, sidebar.css, topbar.css)
+      • CLARA   ➔ UI Primitivos (pills.css, buttons.css, empty-state.css)
+      • CHARLYS ➔ Tabelas & Filtros (table.css)
+      • WALLAME ➔ Dashboard Completo (metrics, charts, priority, centers, activity)
+      • YASMIN  ➔ Operação: Tarefas & Unidades (conditions.css, units.css)
+      • LUÍS    ➔ Auth, Landing Page, Perfil & Ajuda (login, public, profile, help)
+      • YARA    ➔ Modais, Drawers e Forms (drawer.css, modal.css, forms.css)
+
+   4. [PADRÃO OBRIGATÓRIO DE CLASSES TAILWIND (COMO NOMEAR)]:
+      • NÃO CRIE CLASSES CSS NOVAS: Use exclusivamente os utilitários padrão do Tailwind v4.
+      • REMOVA AS CLASSES ANTIGAS DO JSX: Substitua ".app-shell", ".topbar", ".card-heading" etc.
+        diretamente pelas classes Tailwind. Não deixe a classe antiga fantasma no className.
+      • PROIBIDO USAR CORES HARDCODED (ex: "bg-white", "bg-[#f8f9fa]"):
+        Usar cores fixas quebra o Dark Mode! Use sempre os tokens semânticos do projeto:
+        - Fundo da página: "bg-background text-foreground"
+        - Cards, Modais e Gavetas: "bg-card text-card-foreground border-border"
+        - Bordas e divisórias: "border-border" ou "border-input"
+        - Textos secundários/apoio: "text-muted-foreground text-sm"
+        - Verde oficial Licere: "bg-primary text-primary-foreground hover:bg-primary/90"
+        - Tons de destaque/alerta: "text-destructive", "text-amber-500", etc.
+      • PARA CLASSES CONDICIONAIS: Sempre use cn(...) de "@/lib/utils" ou "cn",
+        nunca concatene strings com `${}` manualmente onde pode haver conflito de CSS.
+
+   5. [CHECKLIST OBRIGATÓRIO ANTES DE ABRIR PR]:
+      [ ] Substituiu as classes legadas por classes Tailwind no JSX (sem classes antigas órfãs).
+      [ ] Usou os tokens semânticos (bg-card, text-foreground) em vez de cores hexadecimais fixas.
+      [ ] Esvaziou o conteúdo dos seus arquivos .css (mantendo o arquivo físico vazio).
+      [ ] Testou visualmente a tela alternando entre temas Claro e Escuro.
+      [ ] Rodou "npm run typecheck" e "npm run build" com código 0.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* ── CONFIGURAÇÃO GLOBAL (NÃO APAGAR!) ── */
+/* [OBRIGATÓRIO MANTER - NINGUÉM APAGA ESTE ARQUIVO!] */
 @import "./styles/globals.css";
 
-/* ── Layout ── */
+
+/* ── 1. RESPONSÁVEL: PEDRO ── */
+/* ⚠️ ALERTA: shell.css tem .eyebrow e .text-link usados globalmente. Migre direto no JSX! */
+/* -> Arquivo TSX: src/app/(authenticated)/layout.tsx (.app-shell, .app-main, .content, .page-header) */
 @import "./styles/layout/shell.css";
+/* -> Arquivo TSX: src/components/layout/Sidebar.tsx (.app-sidebar, .sidebar-brand, .nav-item) */
 @import "./styles/layout/sidebar.css";
+/* -> Arquivo TSX: src/components/layout/Topbar.tsx (.topbar, .global-search, .notification-popover) */
 @import "./styles/layout/topbar.css";
 
-/* ── UI primitives ── */
+
+/* ── 2. RESPONSÁVEL: CLARA ── */
+/* ⚠️ ALERTA: Prefira o componente <Button /> em src/components/ui/button.tsx do que reescrever .primary-btn */
+/* -> Arquivo TSX: src/components/ui/button.tsx e botões compartilhados */
 @import "./styles/ui/buttons.css";
+/* -> Arquivo TSX: src/components/shared/status-pill.tsx (.pill, .pill-*, .criticality-*) */
 @import "./styles/ui/pills.css";
-@import "./styles/ui/table.css";
+/* -> Arquivo TSX: src/components/layout/list-controls.tsx (apenas o bloco .empty-state) */
 @import "./styles/ui/empty-state.css";
 
-/* ── Dashboard ── */
+
+/* ── 3. RESPONSÁVEL: CHARLYS ── */
+/* -> Arquivos TSX: src/components/layout/list-controls.tsx (barra de filtros e busca) */
+/* -> Arquivos TSX: tabelas em src/app/(authenticated)/licencas/page.tsx e documentos/page.tsx */
+@import "./styles/ui/table.css";
+
+
+/* ── 4. RESPONSÁVEL: WALLAME ── */
+/* ⚠️ ALERTA: charts.css tem .card-heading que alimenta PriorityList.tsx. Como você é dono dos dois, migre ambos! */
+/* -> Arquivos TSX: src/components/dashboard/Metric.tsx e grid em src/app/(authenticated)/dashboard/page.tsx */
 @import "./styles/dashboard/metrics.css";
+/* -> Arquivo TSX: src/components/dashboard/RiskChart.tsx (.risk-chart-wrap) */
 @import "./styles/dashboard/charts.css";
+/* -> Arquivo TSX: src/components/dashboard/PriorityList.tsx (.priority-list, .priority-card) */
 @import "./styles/dashboard/priority.css";
+/* -> Arquivo TSX: src/app/(authenticated)/dashboard/page.tsx (.centers-table, .center-row) */
 @import "./styles/dashboard/centers.css";
+/* -> Arquivo TSX: src/app/(authenticated)/dashboard/page.tsx (.activity-list) */
 @import "./styles/dashboard/activity.css";
 
-/* ── Pages ── */
+
+/* ── 5. RESPONSÁVEL: YASMIN ── */
+/* -> Arquivos TSX: src/app/(authenticated)/condicionantes/page.tsx e tarefas/page.tsx (.condition-list, checkboxes) */
 @import "./styles/pages/conditions.css";
+/* -> Arquivo TSX: src/app/(authenticated)/unidades/page.tsx (.unit-list, .unit-row, símbolos) */
 @import "./styles/pages/units.css";
-@import "./styles/pages/profile.css";
-@import "./styles/pages/help.css";
-@import "./styles/pages/public.css";
 
-/* ── Modals & drawers ── */
-@import "./styles/modals/drawer.css";
-@import "./styles/modals/modal.css";
-@import "./styles/modals/forms.css";
 
-/* ── Auth ── */
+/* ── 6. RESPONSÁVEL: LUÍS ── */
+/* -> Arquivo TSX: src/app/(public)/login/page.tsx (.login-page, .login-form, .login-brand) */
 @import "./styles/auth/login.css";
+/* -> Arquivo TSX: src/app/(public)/page.tsx (Landing Page: .public-page, .public-header, seções) */
+@import "./styles/pages/public.css";
+/* -> Arquivo TSX: src/app/(authenticated)/perfil/page.tsx (.profile-layout, .settings-card) */
+@import "./styles/pages/profile.css";
+/* -> Arquivo TSX: src/app/(authenticated)/ajuda/page.tsx (.help-page, .help-grid, .help-card) */
+@import "./styles/pages/help.css";
+
+
+/* ── 7. RESPONSÁVEL: YARA ── */
+/* ⚠️ ALERTA: forms.css (.field-label) é usado em todos os modais. Centralize a migração dos campos aqui! */
+/* -> Arquivos TSX: src/components/modals/DrawerShell.tsx e painéis de detalhes (DetailPanel, etc.) */
+@import "./styles/modals/drawer.css";
+/* -> Arquivos TSX: src/components/modals/ (ConfirmModal, ForgotPasswordModal, QuickAdd) */
+@import "./styles/modals/modal.css";
+/* -> Arquivos TSX: campos, labels e inputs em src/components/modals/Nova*Modal.tsx */
+@import "./styles/modals/forms.css";
