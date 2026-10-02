@@ -36,7 +36,6 @@
       • REMOVA AS CLASSES ANTIGAS DO JSX: Substitua ".app-shell", ".topbar", ".card-heading" etc.
         diretamente pelas classes Tailwind. Não deixe a classe antiga fantasma no className.
       • PROIBIDO USAR CORES HARDCODED (ex: "bg-white", "bg-[#f8f9fa]"):
-        Usar cores fixas quebra o Dark Mode! Use sempre os tokens semânticos do projeto:
         - Fundo da página: "bg-background text-foreground"
         - Cards, Modais e Gavetas: "bg-card text-card-foreground border-border"
         - Bordas e divisórias: "border-border" ou "border-input"
