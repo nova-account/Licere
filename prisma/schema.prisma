@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./licere.db"
+}
+
+model Centro {
+  id          String   @id @default(cuid())
+  nome        String
+  cidade      String
+  estado      String
+  responsavel String
+  status      String   @default("Ativa")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  licencas       Licenca[]
+  condicionantes Condicionante[]
+  documentos     Documento[]
+}
+
+model Licenca {
+  id          String   @id @default(cuid())
+  numero      String
+  tipo        String
+  orgao       String
+  emissao     String
+  vencimento  String
+  status      String
+  criticidade String
+  observacao  String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  centroId String
+  centro   Centro @relation(fields: [centroId], references: [id])
+
+  condicionantes Condicionante[]
+  documentos     Documento[]
+}
+
+model Condicionante {
+  id          String   @id @default(cuid())
+  titulo      String
+  responsavel String
+  prazo       String
+  status      String
+  recorrencia String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  centroId String
+  centro   Centro @relation(fields: [centroId], references: [id])
+
+  licencaId String
+  licenca   Licenca @relation(fields: [licencaId], references: [id])
+
+  documentos Documento[]
+}
+
+model Documento {
+  id           String   @id @default(cuid())
+  nome         String
+  categoria    String
+  atualizadoEm String
+  validade     String
+  tamanho      String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  centroId String
+  centro   Centro @relation(fields: [centroId], references: [id])
+
+  licencaId String?
+  licenca   Licenca? @relation(fields: [licencaId], references: [id])
+
+  condicionanteId String?
+  condicionante   Condicionante? @relation(fields: [condicionanteId], references: [id])
+}
