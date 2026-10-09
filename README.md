@@ -1,140 +1,95 @@
-# Licere — Plataforma de Gestão Corporativa e Conformidade Operacional
+# Licere — Gestão Operacional e Conformidade Ambiental
 
-> **Frontend corporativo centralizado para acompanhamento de unidades, documentos, tarefas e indicadores de conformidade ambiental e regulatória.**
-
-- **Demonstração online (Deploy):** [https://nova-account.github.io/Licere/](https://nova-account.github.io/Licere/)
+**Licere** é uma plataforma corporativa centralizada projetada para o acompanhamento e gestão de unidades operacionais, documentos regulatórios, licenças ambientais, tarefas e indicadores de compliance regulatório.
 
 ---
 
-## 1. Contexto do Projeto
+## 1. Visão Geral
 
-A **Licere** é uma plataforma corporativa desenvolvida para simular a operação real de uma empresa com múltiplas unidades (Centros de Distribuição e Filiais). O sistema permite aos gestores e times de conformidade monitorar obrigações, documentos, licenças e tarefas de cada unidade em um painel único e centralizado.
-
-O projeto foi construído seguindo rigorosos padrões de arquitetura de frontend, organização de código, tipagem estrita com TypeScript, responsividade para todos os formatos de tela e separação clara entre dados e estado de interface.
-
----
-
-## 2. Stack Tecnológica
-
-### Obrigatória
-- **Framework:** [Next.js](https://nextjs.org/) (App Router, React Server/Client Components)
-- **Linguagem:** [TypeScript](https://www.typescriptlang.org/) (tipagem estrita em todas as entidades, sem uso de `any`)
-
-### Bibliotecas e Ferramentas
-- **Formulários e Schemas:** [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) para validação robusta e mensagens de erro específicas por campo
-- **Design System e Acessibilidade:** Radix UI Primitives, Lucide React Icons
-- **Estilização:** CSS Modular com Design Tokens (paleta sóbria, micro-animações, layout responsivo para Desktop, Tablet e Mobile)
-- **Gerenciamento de Estado:** Context API reativa com persistência local e sincronização em tempo real entre telas
-- **Testes Automatizados:** Suíte de testes unitários nativa para validação das regras de negócio
+O sistema permite que equipes de gestão e conformidade monitorem obrigações e pendências de múltiplas filiais e centros de distribuição em um único painel em tempo real. A plataforma foca em:
+- **Rastreabilidade total:** Controle unificado de licenças, condicionantes ambientais e documentos comprobatórios.
+- **Prevenção de riscos legais:** Alertas autônomos de prazos e vencimentos.
+- **Multitenancy e Flexibilidade:** Gestão dinâmica de organização/empresa e perfil de usuário sem valores estáticos fixos no código.
+- **Persistência Confiável:** Integração full-stack com banco SQLite via Prisma ORM e Server Actions.
 
 ---
 
-## 3. Estrutura do Sistema
+## 2. Tecnologias Utilizadas
+
+- **Core**: [Next.js](https://nextjs.org/) (App Router, Server Actions) + [React](https://react.dev/)
+- **Linguagem**: [TypeScript](https://www.typescriptlang.org/)
+- **Banco de Dados**: [Prisma ORM](https://www.prisma.io/) + SQLite (`prisma/licere.db`)
+- **Gerenciamento de Estado**: [Zustand](https://zustand-demo.pmnd.rs/) (reatividade e sincronização em tempo real)
+- **Formulários e Validação**: [React Hook Form](https://react-hook-form.com/) integrado com schemas [Zod](https://zod.dev/)
+- **Testes Automatizados**: [Jest](https://jestjs.io/) + React Testing Library
+- **Design & Ícones**: CSS moderno, Radix UI Primitives, Lucide Icons
+
+---
+
+## 3. Principais Funcionalidades e Regras de Negócio
+
+1. **Painel de Indicadores (Dashboard):**
+   - Métricas em tempo real de unidades ativas, documentos pendentes e condicionantes.
+   - Lista de prioridades com ordenação por urgência de vencimento.
+2. **Ciclo de Vida de Documentos & Licenças:**
+   - Status calculados dinamicamente com base nas datas de validade (`Válido`, `Próximo do vencimento`, `Expirado`).
+3. **Controle Estrito de Exclusão:**
+   - Regra de negócio automatizada que bloqueia a exclusão de unidades operacionais caso possuam pendências ativas (documentos vencidos ou condicionantes não concluídas).
+4. **Organização e Perfil Dinâmicos:**
+   - Suporte a personalização de empresa e perfil do gestor na tela `/perfil`, sincronizando instantaneamente o avatar, iniciais e contexto em toda a aplicação.
+5. **Acesso Rápido / Demonstração:**
+   - Autenticação com suporte a acesso rápido simulado (Marina Azevedo / Operações Brasil) e autenticação personalizada para qualquer usuário ou organização.
+
+---
+
+## 4. Estrutura do Projeto
 
 ```
-├── artifacts/licere/
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── (public)/
-│   │   │   │   ├── login/         # Tela de Login com validação Zod e feedback visual
-│   │   │   │   └── page.tsx       # Landing corporativa de apresentação
-│   │   │   └── (authenticated)/   # Rotas protegidas (exigem sessão ativa)
-│   │   │       ├── dashboard/     # Painel de indicadores em tempo real
-│   │   │       ├── unidades/      # Lista de unidades com pesquisa, filtros e paginação
-│   │   │       ├── documentos/    # Gestão de acervo com status derivado da validade
-│   │   │       ├── tarefas/       # Rotina operacional com modal de confirmação
-│   │   │       ├── licencas/      # Gestão de licenças ambientais
-│   │   │       ├── perfil/        # Configurações de perfil do usuário
-│   │   │       └── layout.tsx     # Shell corporativo e Auth Guard
-│   │   ├── components/
-│   │   │   ├── layout/            # Topbar, Sidebar, ListControls (busca, filtros)
-│   │   │   ├── modals/            # Detalhamento de Unidade, Modais de Cadastro, Confirmação
-│   │   │   ├── dashboard/         # Cards de Métricas, Gráficos de Risco, Listas Prioritárias
-│   │   │   └── shared/            # StatusPills, Badges, EmptyStates
-│   │   ├── lib/
-│   │   │   └── AppDataContext.tsx # Estado centralizado e regras de negócio
-│   │   ├── shared/
-│   │   │   ├── types.ts           # Interfaces TypeScript (Unidade, Documento, Tarefa)
-│   │   │   ├── data.ts            # Mocks representativos para todos os cenários
-│   │   │   └── utils.ts           # Helpers e cálculo dinâmico de status de documentos
-│   │   └── styles/                # Design tokens, tipografia e layouts responsivos
-│   └── scripts-teste/
-│       └── test-rules.mjs         # Suíte de testes unitários automatizados
-```
-
----
-
-## 4. Regras de Negócio Implementadas
-
-1. **Autenticação Obrigatória:**
-   - Rotas internas protegidas pelo `AuthenticatedLayout`. Usuários não autenticados são redirecionados automaticamente para `/login`.
-   - Formulário de login validado via Zod com feedback visual imediato para campos inválidos e acesso demo com um clique.
-
-2. **Status de Unidade (Ativa ou Inativa):**
-   - Unidades cadastradas possuem status `'Ativa'` ou `'Inativa'`.
-   - **Bloqueio em Unidades Inativas:** Os formulários de criação de novas tarefas e documentos bloqueiam a vinculação a unidades inativas com aviso explicativo.
-   - **Modo Somente Leitura:** No painel de detalhamento da unidade inativa, documentos e tarefas são exibidos exclusivamente para leitura, acompanhados de banner informativo.
-
-3. **Status de Documento Calculado Dinamicamente:**
-   - O status não é inserido manualmente pelo usuário. A função `getDocumentStatus(validade)` calcula no frontend a partir da data de vencimento:
-     - **Expirado:** Validade anterior à data atual (`expDate < today`).
-     - **Próximo do vencimento:** Validade entre hoje e 15 dias (`diffDays <= 15`).
-     - **Válido:** Validade superior a 15 dias ou indeterminada/permanente.
-
-4. **Confirmação Obrigatória para Conclusão de Tarefas:**
-   - Ao clicar no checkbox de conclusão de uma tarefa, um modal de confirmação (`ConfirmModal`) é acionado para evitar conclusões acidentais.
-
-5. **Painel de Indicadores em Tempo Real:**
-   - O Dashboard exibe o total de unidades cadastradas, unidades ativas, documentos pendentes, tarefas pendentes e o indicador integrado de pendências.
-   - Qualquer alteração feita nas telas de listagem (concluir uma tarefa, cadastrar um documento) é refletida instantaneamente no Dashboard sem necessidade de recarregar a página (`F5`).
-
-6. **Regra de Negócio Avançada — Bloqueio de Exclusão:**
-   - Ao tentar excluir uma unidade, o sistema verifica se existem documentos a vencer/expirados ou tarefas pendentes/em andamento vinculadas. Se houver pendências ativas, a exclusão é bloqueada com mensagem explicativa informando o total exato de itens impeditivos.
-
-7. **Histórico de Alterações e Auditoria:**
-   - O painel de detalhamento da unidade apresenta o registro de ações recentes (quem alterou, o que alterou e quando), garantindo rastreabilidade das operações.
-
----
-
-## 5. Testes Automatizados
-
-A aplicação inclui suíte de testes unitários que cobre integralmente as regras de negócio:
-- Cálculo dinâmico do status de documento (Expirado, Próximo do vencimento, Válido, Indeterminado);
-- Bloqueio de novos registros em unidades inativas;
-- Bloqueio de exclusão de unidades com pendências ativas;
-- Permissão de exclusão para unidades sem pendências.
-
-Para executar os testes:
-```bash
-cd artifacts/licere
-npm test
-# ou: node scripts-teste/test-rules.mjs
+├── src/
+│   ├── actions/             # Server Actions (Prisma ORM / SQLite)
+│   ├── app/                 # Rotas e páginas (Next.js App Router)
+│   ├── components/          # Componentes visuais (Dashboard, Layout, Modais, UI)
+│   ├── lib/                 # AppDataContext (Zustand store), cliente Prisma e utilitários
+│   ├── shared/              # Schemas Zod, tipos TypeScript e helpers
+│   ├── styles/              # Design system e folhas de estilo CSS
+│   ├── types/               # Declarações de ambiente e tipagem global
+│   └── __tests__/           # Suíte de testes unitários de regras de negócio (Jest)
+├── prisma/
+│   ├── schema.prisma        # Definição dos modelos de dados
+│   └── licere.db            # Banco de dados local SQLite
+├── public/                  # Arquivos estáticos e favicon
+├── tsconfig.json            # Configuração do TypeScript
+├── package.json             # Dependências e scripts npm
+└── jest.config.js           # Configurações do Jest
 ```
 
 ---
 
-## 6. Como Executar o Projeto Localmente
+## 5. Como Executar o Projeto
 
 ### Pré-requisitos
 - Node.js (v18 ou superior)
-- `pnpm` ou `npm`
+- Gerenciador de pacotes `npm`
 
-### Passos
+### Passos de Instalação e Execução
 
-1. **Instalar as dependências:**
+1. **Instalar dependências:**
    ```bash
-   cd artifacts/licere
-   pnpm install
-   # ou: npm install
+   npm install
    ```
 
-2. **Executar a aplicação em desenvolvimento:**
+2. **Iniciar o servidor de desenvolvimento:**
    ```bash
-   pnpm run dev
-   # ou: npm run dev
+   npm run dev
+   ```
+   Acesse [http://localhost:5173](http://localhost:5173) no navegador.
+
+3. **Executar a suíte de testes:**
+   ```bash
+   npm test
    ```
 
-3. **Acessar no navegador:**
-   - Acesse [http://localhost:5173](http://localhost:5173) ou [http://localhost:3000](http://localhost:3000)
-   - Na tela de login, utilize qualquer e-mail corporativo válido e senha com no mínimo 6 caracteres, ou clique em **"Explorar workspace de demonstração"** para entrar instantaneamente com credenciais pré-configuradas.
-
+4. **Gerar a build de produção:**
+   ```bash
+   npm run build
+   ```
