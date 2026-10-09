@@ -32,28 +32,35 @@ const chartConfig = {
 
 export function RiskChart() {
   return (
-    <div className="chart-card">
-      <div className="card-heading">
+    <div className="min-w-0 rounded-[14px] border border-border bg-card p-[21px] text-card-foreground shadow-sm max-[760px]:overflow-hidden max-[760px]:p-[17px]">
+      <div className="flex items-start justify-between gap-[15px]">
         <div>
-          <p className="eyebrow">Jan — Dez 2025</p>
-          <h2>Mapa de vencimentos</h2>
+          <p className="eyebrow mb-[6px]">Jan — Dez 2025</p>
+          <h2 className="m-0 font-display text-lg font-bold text-primary">
+            Mapa de vencimentos
+          </h2>
         </div>
         <span className="chart-period">2025</span>
       </div>
-      <div className="chart-legend">
+      <div className="mt-[19px] flex items-center gap-[15px] text-[10px] text-muted-foreground max-[400px]:gap-2">
         <span>
-          <i className="legend-dot critical" />
+          <i className="mr-[5px] inline-block size-[7px] rounded-full bg-chart-1" />
           Alto risco
         </span>
         <span>
-          <i className="legend-dot attention" />
+          <i className="mr-[5px] inline-block size-[7px] rounded-full bg-chart-3" />
           Atenção
         </span>
-        <span className="chart-note">18 itens monitorados</span>
+        <span className="ml-auto font-mono text-[9px] text-muted-foreground max-[400px]:hidden">
+          18 itens monitorados
+        </span>
       </div>
       
-      <div className="chart-wrap" style={{ height: '250px', width: '100%', paddingTop: '10px' }}>
-        <ChartContainer config={chartConfig} className="h-full w-full">
+      <div className="mt-[9px] h-[250px] w-full overflow-hidden pt-[10px] max-[760px]:mr-[-4px] max-[760px]:overflow-x-auto">
+        <ChartContainer
+          config={chartConfig}
+          className="h-full w-full [&_.recharts-surface]:block [&_.recharts-surface]:h-[230px] [&_.recharts-surface]:min-w-[490px] [&_.recharts-surface]:w-full max-[1100px]:[&_.recharts-surface]:min-w-0 max-[760px]:[&_.recharts-surface]:h-[210px] max-[760px]:[&_.recharts-surface]:w-[650px]"
+        >
           <AreaChart
             accessibilityLayer
             data={chartData}
@@ -86,55 +93,16 @@ export function RiskChart() {
                 if (!active || !payload?.length) return null;
                 const item = payload[0];
                 return (
-                  <div
-                    style={{
-                      background: '#ffffff',
-                      border: '1px solid rgba(16, 42, 34, 0.12)',
-                      borderRadius: '8px',
-                      padding: '8px 14px',
-                      boxShadow: '0 4px 14px rgba(0, 0, 0, 0.08)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      textAlign: 'center',
-                      gap: '4px',
-                      minWidth: '120px',
-                    }}
-                  >
-                    <span style={{ fontSize: '11px', color: '#688275', fontWeight: 600 }}>
+                  <div className="flex min-w-[120px] flex-col items-center justify-center gap-1 rounded-[8px] border border-border bg-card px-[14px] py-2 text-center text-card-foreground shadow-[0_4px_14px_rgba(0,0,0,0.08)]">
+                    <span className="text-[11px] font-semibold text-muted-foreground">
                       {label}
                     </span>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px',
-                        width: '100%',
-                      }}
-                    >
-                      <span
-                        style={{
-                          width: '7px',
-                          height: '7px',
-                          borderRadius: '50%',
-                          background: '#164e3f',
-                          display: 'inline-block',
-                          flexShrink: 0,
-                        }}
-                      />
-                      <span style={{ fontSize: '12px', color: '#243029', fontWeight: 500 }}>
+                    <div className="flex w-full items-center justify-center gap-1.5">
+                      <span className="inline-block size-[7px] shrink-0 rounded-full bg-primary" />
+                      <span className="text-[12px] font-medium text-card-foreground">
                         Vencimentos:
                       </span>
-                      <strong
-                        style={{
-                          fontSize: '13px',
-                          color: '#164e3f',
-                          fontWeight: 700,
-                          fontFamily: 'var(--app-font-mono, monospace)',
-                        }}
-                      >
+                      <strong className="font-mono text-[13px] font-bold text-primary">
                         {item.value}
                       </strong>
                     </div>
@@ -171,11 +139,13 @@ export function RiskChart() {
         </ChartContainer>
       </div>
 
-      <div className="chart-callout">
-        <span className="callout-dot" />
-        <div>
-          <b>Outubro concentra o maior risco</b>
-          <small>4 licenças e 6 condicionantes vencem no período</small>
+      <div className="mt-0.5 flex items-center gap-2.5 rounded-[10px] bg-primary/10 px-3 py-2.5">
+        <span className="size-[7px] shrink-0 rounded-full bg-amber-500" />
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <b className="text-[11px] text-primary">Outubro concentra o maior risco</b>
+          <small className="text-[10px] text-muted-foreground">
+            4 licenças e 6 condicionantes vencem no período
+          </small>
         </div>
       </div>
     </div>

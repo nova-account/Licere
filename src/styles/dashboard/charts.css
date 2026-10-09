@@ -13,7 +13,6 @@
 }
 
 /* ── Card base ── */
-.chart-card,
 .priority-card,
 .centers-card,
 .activity-card,
@@ -22,11 +21,6 @@
   border-radius: 14px;
   background: #ffffff;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03), 0 6px 16px -3px rgba(15, 23, 42, 0.04);
-}
-
-.chart-card {
-  min-width: 0;
-  padding: 21px;
 }
 
 .priority-card,
@@ -61,94 +55,11 @@
 }
 
 /* ── Chart elements ── */
-.chart-legend {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-top: 19px;
-  color: #809397;
-  font-size: 10px;
-}
-
-.legend-dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  margin-right: 5px;
-  border-radius: 50%;
-}
-
-.legend-dot.critical {
-  background: #277354;
-}
-
-.legend-dot.attention {
-  background: #91aebe;
-}
-
-.chart-note {
-  margin-left: auto;
-  color: #9da39d;
-  font-family: var(--app-font-mono);
-  font-size: 9px;
-}
-
-.chart-wrap {
-  width: 100%;
-  margin-top: 9px;
-  overflow: hidden;
-}
-
-.chart-wrap svg {
-  display: block;
-  width: 100%;
-  min-width: 490px;
-  height: 230px;
-}
-
-.chart-callout {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 2px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: #edf4f2;
-}
-
-.callout-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #d08b3d;
-}
-
-.chart-callout div {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.chart-callout b {
-  color: #315c4a;
-  font-size: 11px;
-}
-
-.chart-callout small {
-  color: #91948b;
-  font-size: 10px;
-}
-
 /* ── Responsive ── */
 @media (max-width: 1100px) {
   .dashboard-grid,
   .lower-grid {
     grid-template-columns: 1fr;
-  }
-
-  .chart-wrap svg {
-    min-width: 0;
   }
 }
 
@@ -161,34 +72,10 @@
     gap: 12px;
   }
 
-  .chart-card,
   .priority-card,
   .centers-card,
   .activity-card {
     padding: 17px;
   }
-
-  .chart-card {
-    overflow: hidden;
-  }
-
-  .chart-wrap {
-    overflow-x: auto;
-    margin-right: -4px;
-  }
-
-  .chart-wrap svg {
-    width: 650px;
-    height: 210px;
-  }
 }
 
-@media (max-width: 400px) {
-  .chart-legend {
-    gap: 8px;
-  }
-
-  .chart-note {
-    display: none;
-  }
-}
