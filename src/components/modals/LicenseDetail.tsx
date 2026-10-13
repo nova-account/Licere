@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import { ShieldCheck } from 'lucide-react';
 import type { Condicionante, Documento, Licenca, DetailItem } from '@/shared/types';
 import { StatusPill } from '@/components/shared/status-pill';
-import { formatDateBr } from '@/shared/utils';
+import { formatDateBr, centerName } from '@/shared/utils';
 import { DrawerShell, RelationshipLink } from './DrawerShell';
 import { useAppData } from '@/lib/AppDataContext';
-
-const centerName = (id: string, centros: any[]) => centros.find((center: any) => center.id === id)?.nome ?? id;
 
 export function LicenseDetail({
   item,
@@ -48,11 +46,12 @@ export function LicenseDetail({
         <StatusPill status={draft.status} />
       </div>
 
-      <label className="field-label">
+      <label className="flex flex-col gap-[7px] text-[#6f888c] text-[10px] font-bold">
         Observação
         <textarea
           value={draft.observacao}
           onChange={(e) => setDraft({ ...draft, observacao: e.target.value })}
+          className="min-h-[105px] resize-y p-[11px] outline-none border border-[#d7e3e5] rounded-[10px] text-[#315b4a] bg-[#fbfcfc] text-xs leading-[1.55] focus:border-[#70a48a] focus:ring-2 focus:ring-[#317d56]/15 font-normal"
         />
       </label>
 

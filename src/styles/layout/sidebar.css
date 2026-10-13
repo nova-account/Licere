@@ -2,12 +2,19 @@
 .sidebar {
   width: 264px;
   flex: 0 0 264px;
-  min-height: 100dvh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   padding: 27px 18px 18px;
   color: hsl(var(--sidebar-foreground));
   background: #12382d;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none;
 }
 
 .sidebar-open {

@@ -1,1 +1,14 @@
-/* Migrado por Luís */
+/* ── Licere Login Page - Scoped Visual Texture ── */
+/* Preserved custom geometric grid texture with gradient mask-image.
+   Maintained in scoped CSS per migration guidelines to avoid brittle multi-layer gradient arbitrary utilities. */
+.visual-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.14;
+  background-image:
+    linear-gradient(rgba(221, 241, 238, 0.28) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(221, 241, 238, 0.28) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(to bottom, black, transparent 78%);
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent 78%);
+}

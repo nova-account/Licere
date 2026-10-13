@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { X, Save, FolderOpen, UploadCloud, AlertCircle } from 'lucide-react';
+import { FolderOpen, UploadCloud, AlertCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { Documento } from '@/shared/types';
 import { useAppData } from '@/lib/AppDataContext';
 import { documentoFormSchema } from '@/shared/schemas';
+import {
+  FormModal,
+  FormField,
+  FormInput,
+  FormSelect,
+} from './FormModal';
 
 type NovoDocumentoFormData = z.infer<typeof documentoFormSchema>;
 
@@ -14,6 +20,14 @@ interface NovoDocumentoModalProps {
   onClose: () => void;
   onSave: (documento: Documento) => void;
 }
+
+const CATEGORIA_OPTIONS = [
+  { value: 'Relatórios', label: 'Relatórios' },
+  { value: 'Laudos Técnicos', label: 'Laudos Técnicos' },
+  { value: 'Licenças & Alvarás', label: 'Licenças & Alvarás' },
+  { value: 'Outorgas', label: 'Outorgas' },
+  { value: 'Certidões', label: 'Certidões' },
+];
 
 export function NovoDocumentoModal({ open, onClose, onSave }: NovoDocumentoModalProps) {
   const { centros, licencas } = useAppData();
@@ -24,6 +38,7 @@ export function NovoDocumentoModal({ open, onClose, onSave }: NovoDocumentoModal
   const {
     register,
     handleSubmit,
+    watch,
     setValue,
     reset,
     formState: { errors },
@@ -39,6 +54,9 @@ export function NovoDocumentoModal({ open, onClose, onSave }: NovoDocumentoModal
     },
   });
 
+  const categoria = watch('categoria');
+  const centroId = watch('centroId');
+
   useEffect(() => {
     if (defaultCentroId) {
       setValue('centroId', defaultCentroId);
@@ -46,24 +64,11 @@ export function NovoDocumentoModal({ open, onClose, onSave }: NovoDocumentoModal
   }, [defaultCentroId, setValue]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    if (open) {
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
-    } else {
-      document.body.style.overflow = '';
+    if (!open) {
       reset();
       setInactiveError(null);
     }
-    return () => {
-      document.body.style.overflow = '';
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [open, onClose, reset]);
-
-  if (!open) return null;
+  }, [open, reset]);
 
   const onSubmit = (data: NovoDocumentoFormData) => {
     setInactiveError(null);
@@ -74,9 +79,10 @@ export function NovoDocumentoModal({ open, onClose, onSave }: NovoDocumentoModal
       return;
     }
 
+    const cleanName = data.nome.trim().replace(/[<>:"/\\|?*\x00-\x1F]/g, '');
     const novo: Documento = {
       id: `doc-${Date.now()}`,
-      nome: data.nome.endsWith('.pdf') ? data.nome : `${data.nome}.pdf`,
+      nome: cleanName.toLowerCase().endsWith('.pdf') ? cleanName : `${cleanName}.pdf`,
       categoria: data.categoria,
       centroId: data.centroId,
       licencaId: licencas.find((l) => l.centroId === data.centroId)?.id,
@@ -91,129 +97,85 @@ export function NovoDocumentoModal({ open, onClose, onSave }: NovoDocumentoModal
   };
 
   return (
-    <div className="modal-backdrop animate-fade" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="quick-modal animate-rise" style={{ maxWidth: '520px', width: '100%' }}>
-        <div className="drawer-head">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span className="document-icon" style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(36, 91, 69, 0.1)', color: '#245b45', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <FolderOpen size={18} />
-            </span>
-            <div>
-              <p className="eyebrow">Repositório Documental</p>
-              <h2 style={{ fontSize: '17px', margin: 0 }}>Novo Documento / Evidência</h2>
-            </div>
-          </div>
-          <button className="icon-btn" onClick={onClose} aria-label="Fechar">
-            <X size={18} />
-          </button>
+    <FormModal
+      open={open}
+      onClose={onClose}
+      onSubmit={handleSubmit(onSubmit)}
+      title="Novo Documento / Evidência"
+      eyebrow="Repositório Documental"
+      icon={<FolderOpen size={18} />}
+      submitLabel="Salvar documento"
+      maxWidth="520px"
+    >
+      {inactiveError && (
+        <div className="py-2.5 px-3 bg-[#fdeded] border border-[#f5c2c7] rounded-[6px] text-[#b02a37] text-[12px] flex items-center gap-2">
+          <AlertCircle size={15} />
+          <span>{inactiveError}</span>
         </div>
+      )}
 
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <div className="drawer-content" style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {inactiveError && (
-              <div style={{ padding: '10px 12px', background: '#fdeded', border: '1px solid #f5c2c7', borderRadius: '6px', color: '#b02a37', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <AlertCircle size={15} />
-                <span>{inactiveError}</span>
-              </div>
-            )}
+      <FormField
+        label="Nome do Arquivo ou Documento"
+        required
+        error={errors.nome?.message}
+      >
+        <FormInput
+          type="text"
+          placeholder="Ex: Laudo_Analise_Agua_2025.pdf"
+          error={!!errors.nome}
+          {...register('nome')}
+        />
+      </FormField>
 
-            <label className="field-label" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 600, color: '#688275', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Nome do Arquivo ou Documento</span>
-              <input
-                type="text"
-                placeholder="Ex: Laudo_Analise_Agua_2025.pdf"
-                {...register('nome')}
-                style={{
-                  height: '38px',
-                  padding: '0 12px',
-                  borderRadius: '8px',
-                  border: errors.nome ? '1px solid #b02a37' : '1px solid #dbe2dd',
-                  background: errors.nome ? '#fffbfb' : '#fff',
-                  fontSize: '13px',
-                }}
-              />
-              {errors.nome && (
-                <span style={{ color: '#b02a37', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <AlertCircle size={12} /> {errors.nome.message}
-                </span>
-              )}
-            </label>
+      <div className="grid grid-cols-[1.1fr_1fr] gap-3.5">
+        <FormField
+          label="Categoria"
+          error={errors.categoria?.message}
+        >
+          <FormSelect
+            value={categoria}
+            onValueChange={(val) => setValue('categoria', val, { shouldValidate: true })}
+            options={CATEGORIA_OPTIONS}
+            error={!!errors.categoria}
+          />
+        </FormField>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-              <label className="field-label" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 600, color: '#688275', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Categoria</span>
-                <select
-                  {...register('categoria')}
-                  style={{ height: '38px', padding: '0 10px', borderRadius: '8px', border: '1px solid #dbe2dd', background: '#fff', fontSize: '13px' }}
-                >
-                  <option value="Relatórios">Relatórios</option>
-                  <option value="Licenças">Licenças</option>
-                  <option value="Protocolos">Protocolos</option>
-                  <option value="Plantas">Plantas</option>
-                  <option value="Laudos">Laudos</option>
-                </select>
-                {errors.categoria && (
-                  <span style={{ color: '#b02a37', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <AlertCircle size={12} /> {errors.categoria.message}
-                  </span>
-                )}
-              </label>
-
-              <label className="field-label" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 600, color: '#688275', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Unidade (Apenas ativas)</span>
-                <select
-                  {...register('centroId')}
-                  style={{ height: '38px', padding: '0 10px', borderRadius: '8px', border: '1px solid #dbe2dd', background: '#fff', fontSize: '13px' }}
-                >
-                  {centros.map((c) => (
-                    <option key={c.id} value={c.id} disabled={c.status === 'Inativa'}>
-                      {c.nome} {c.status === 'Inativa' ? '(Inativa - Bloqueada)' : ''}
-                    </option>
-                  ))}
-                </select>
-                {errors.centroId && (
-                  <span style={{ color: '#b02a37', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <AlertCircle size={12} /> {errors.centroId.message}
-                  </span>
-                )}
-              </label>
-            </div>
-
-            <label className="field-label" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 600, color: '#688275', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Validade do Documento</span>
-              <input
-                type="date"
-                {...register('validade')}
-                style={{
-                  height: '38px',
-                  padding: '0 12px',
-                  borderRadius: '8px',
-                  border: errors.validade ? '1px solid #b02a37' : '1px solid #dbe2dd',
-                  background: errors.validade ? '#fffbfb' : '#fff',
-                  fontSize: '13px',
-                }}
-              />
-              {errors.validade && (
-                <span style={{ color: '#b02a37', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <AlertCircle size={12} /> {errors.validade.message}
-                </span>
-              )}
-            </label>
-
-            <div style={{ padding: '16px', borderRadius: '8px', border: '1px dashed #c4d4cc', background: '#f8faf9', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-              <UploadCloud size={24} color="#245b45" />
-              <span style={{ fontSize: '12px', fontWeight: 600, color: '#245b45' }}>Clique ou arraste o arquivo PDF aqui</span>
-              <span style={{ fontSize: '11px', color: '#7a9186' }}>Formatos aceitos: PDF, DOCX, PNG (máx. 25MB)</span>
-            </div>
-          </div>
-
-          <div className="drawer-foot" style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', padding: '14px 24px', borderTop: '1px solid #edf1ee', background: '#fbfcfb' }}>
-            <button type="submit" className="primary-btn" style={{ height: '38px', padding: '0 18px' }}>
-              <Save size={15} /> Fazer upload
-            </button>
-          </div>
-        </form>
+        <FormField
+          label="Unidade Vinculada"
+          required
+          error={errors.centroId?.message}
+        >
+          <FormSelect
+            value={centroId}
+            onValueChange={(val) => setValue('centroId', val, { shouldValidate: true })}
+            options={centros.map((c) => ({ value: c.id, label: c.nome }))}
+            error={!!errors.centroId}
+          />
+        </FormField>
       </div>
-    </div>
+
+      <FormField
+        label="Validade do Documento"
+        error={errors.validade?.message}
+      >
+        <FormInput
+          type="date"
+          error={!!errors.validade}
+          {...register('validade')}
+        />
+      </FormField>
+
+      <div
+        className="border-[1.5px] border-dashed border-[#cfdbd5] rounded-[10px] py-6 px-4 flex flex-col items-center justify-center gap-2 bg-[#fcfdfd] cursor-pointer transition-all duration-150 hover:border-[#70a48a] hover:bg-[#f4f7f6]"
+      >
+        <div className="size-[38px] rounded-full bg-[#e9f1ee] flex items-center justify-center text-[#1b6848]">
+          <UploadCloud size={20} />
+        </div>
+        <div className="text-center">
+          <p className="m-0 text-[12px] font-semibold text-[#2c4e3f]">Clique para simular upload ou arraste o PDF</p>
+          <span className="text-[10px] text-[#829397]">PDF, DOCX ou XLSX até 25MB (simulação)</span>
+        </div>
+      </div>
+    </FormModal>
   );
 }

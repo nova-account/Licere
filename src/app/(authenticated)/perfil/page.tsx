@@ -1,166 +1,305 @@
 'use client';
 
 import React, { type FormEvent, useEffect, useState } from 'react';
-import { Check, Settings2, ShieldCheck } from 'lucide-react';
+import { Check, ShieldCheck } from 'lucide-react';
 import { PageHeader, initials } from '@/shared/ui';
 import { useAppData } from '@/lib/AppDataContext';
-import { Button } from '@/components/ui/button';
-
-const fieldLabelClass = 'flex flex-col gap-[7px] text-[10px] font-bold text-muted-foreground';
-const fieldInputClass =
-  'box-border h-[42px] w-full rounded-[9px] border border-input bg-card px-[11px] text-[12px] font-medium text-foreground outline-none focus:border-primary/60 focus:ring-[3px] focus:ring-primary/10';
+import { fetchUsuariosDb, updatePerfilDb } from '@/actions/db-actions';
+import { getSessionUserId, startSession } from '@/lib/session';
 
 type Profile = {
+  id?: string;
   nome: string;
   email: string;
   cargo: string;
+  tipoAcesso: string;
   empresa: string;
   telefone: string;
-};
-
-const defaultProfile: Profile = {
-  nome: 'Marina Azevedo',
-  email: 'marina.azevedo@operacoesbrasil.com.br',
-  cargo: 'Administradora',
-  empresa: 'Operações Brasil',
-  telefone: '+55 11 98842-0176',
+  centroId?: string | null;
 };
 
 export default function PerfilPage() {
-  const { setWorkspace, setUser } = useAppData();
-  const [profile, setProfile] = useState<Profile>(defaultProfile);
-  const [draft, setDraft] = useState(profile);
+  const { user, setUsuarios, setWorkspace, setUser } = useAppData();
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem('licere-profile');
-      if (raw) {
-        const savedProfile = JSON.parse(raw);
-        setProfile(savedProfile);
-        setDraft(savedProfile);
-      } else {
-        const auth = localStorage.getItem('licere_auth_user');
-        if (auth) {
-          const parsed = JSON.parse(auth);
-          const initial = {
-            ...defaultProfile,
-            nome: parsed.nome || defaultProfile.nome,
-            email: parsed.email || defaultProfile.email,
-            cargo: parsed.role || defaultProfile.cargo,
-            empresa: parsed.empresa || defaultProfile.empresa,
-          };
-          setProfile(initial);
-          setDraft(initial);
-        }
-      }
-    } catch { }
-  }, []);
+  const [profile, setProfile] = useState<Profile>(() => ({
+    id: user?.id || '',
+    nome: user?.nome || '',
+    email: user?.email || '',
+    cargo: user?.cargo || '',
+    tipoAcesso: user?.tipoAcesso || '',
+    empresa: user?.empresa || '',
+    telefone: user?.telefone || '',
+    centroId: user?.centroId ?? null,
+  }));
+
+  const [draft, setDraft] = useState<Profile>(profile);
   const [saved, setSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
+  // Sincroniza do banco SQLite na inicialização para garantir dados 100% atualizados
   useEffect(() => {
-    setDraft(profile);
-  }, [profile]);
+    let isMounted = true;
+
+    async function loadFreshProfile() {
+      try {
+        const dbUsers = await fetchUsuariosDb();
+        if (!dbUsers || dbUsers.length === 0 || !isMounted) return;
+
+        setUsuarios(dbUsers);
+
+        const sessionUserId = getSessionUserId();
+        let current = dbUsers.find((u) => u.id === sessionUserId);
+
+        if (!current) {
+          const rawAuth = localStorage.getItem('licere_auth_user');
+          if (rawAuth) {
+            try {
+              const parsed = JSON.parse(rawAuth);
+              if (parsed?.email) {
+                current = dbUsers.find((u) => u.email.toLowerCase() === parsed.email.trim().toLowerCase());
+              }
+            } catch { }
+          }
+        }
+
+        if (!current && user?.email) {
+          current = dbUsers.find((u) => u.email.toLowerCase() === user.email?.trim().toLowerCase());
+        }
+
+        if (!current && dbUsers.length > 0) {
+          current = dbUsers[0];
+        }
+
+        if (current && isMounted) {
+          startSession(current.id);
+          const loaded: Profile = {
+            id: current.id,
+            nome: current.nome,
+            email: current.email,
+            cargo: current.cargo,
+            tipoAcesso: current.tipoAcesso,
+            empresa: current.empresa || '',
+            telefone: current.telefone || '',
+            centroId: current.centroId ?? null,
+          };
+
+          setProfile(loaded);
+          setDraft(loaded);
+          setUser(current);
+          setWorkspace({
+            nome: current.empresa || '',
+            tipo: 'Acesso Corporativo',
+          });
+        }
+      } catch (err) {
+        console.error('Erro ao carregar perfil do banco:', err);
+      }
+    }
+
+    loadFreshProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Quando o contexto global for atualizado
+  useEffect(() => {
+    if (user && user.nome) {
+      const updated: Profile = {
+        id: user.id || profile.id || '',
+        nome: user.nome,
+        email: user.email || '',
+        cargo: user.cargo || '',
+        tipoAcesso: user.tipoAcesso || '',
+        empresa: user.empresa || '',
+        telefone: user.telefone || '',
+        centroId: user.centroId ?? null,
+      };
+      setProfile((prev) => ({ ...prev, ...updated }));
+      setDraft((prev) => ({
+        ...prev,
+        ...updated,
+        nome: prev.nome || updated.nome,
+        email: prev.email || updated.email,
+        cargo: prev.cargo || updated.cargo,
+        empresa: prev.empresa || updated.empresa,
+        telefone: prev.telefone || updated.telefone,
+      }));
+    }
+  }, [user]);
 
   const update = (field: keyof Profile, value: string) =>
     setDraft((old) => ({ ...old, [field]: value }));
 
-  const save = (event: FormEvent) => {
+  const save = async (event: FormEvent) => {
     event.preventDefault();
-    setProfile(draft);
-    setUser(draft);
-    setWorkspace({
-      nome: draft.empresa || 'Operações Brasil',
-      tipo: 'Acesso Corporativo',
-    });
+    if (!draft.id) return;
+    setIsSaving(true);
+
     try {
-      localStorage.setItem('licere-profile', JSON.stringify(draft));
+      const updatedUser = await updatePerfilDb(draft.id, {
+        nome: draft.nome.trim(),
+        email: draft.email.trim(),
+        cargo: draft.cargo.trim(),
+        empresa: draft.empresa.trim(),
+        telefone: draft.telefone.trim() || null,
+      });
+
+      const updatedProfile: Profile = {
+        id: updatedUser.id,
+        nome: updatedUser.nome,
+        email: updatedUser.email,
+        cargo: updatedUser.cargo,
+        tipoAcesso: updatedUser.tipoAcesso,
+        empresa: updatedUser.empresa,
+        telefone: updatedUser.telefone || '',
+        centroId: updatedUser.centroId ?? null,
+      };
+
+      setProfile(updatedProfile);
+      setDraft(updatedProfile);
+      setUser(updatedUser);
+      setWorkspace({
+        nome: updatedUser.empresa,
+        tipo: 'Acesso Corporativo',
+      });
+      setUsuarios((prev) =>
+        prev.map((u) => (u.id === updatedUser.id ? updatedUser : u))
+      );
+
+      // Atualiza caches legados para consistência se existirem
       const auth = localStorage.getItem('licere_auth_user');
       if (auth) {
-        const parsed = JSON.parse(auth);
-        parsed.nome = draft.nome;
-        parsed.email = draft.email;
-        parsed.cargo = draft.cargo;
-        parsed.empresa = draft.empresa;
-        localStorage.setItem('licere_auth_user', JSON.stringify(parsed));
+        try {
+          const parsed = JSON.parse(auth);
+          parsed.nome = updatedUser.nome;
+          parsed.email = updatedUser.email;
+          parsed.cargo = updatedUser.cargo;
+          parsed.tipoAcesso = updatedUser.tipoAcesso;
+          parsed.role = updatedUser.tipoAcesso;
+          parsed.empresa = updatedUser.empresa;
+          parsed.telefone = updatedUser.telefone || '';
+          localStorage.setItem('licere_auth_user', JSON.stringify(parsed));
+        } catch { }
       }
+
       window.dispatchEvent(new Event('licere:profile_updated'));
-    } catch {}
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      console.error('Erro ao atualizar perfil no banco:', err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
-    <main className="mx-auto max-w-[1500px] bg-background px-[48px] pt-[52px] pb-[84px] max-[1100px]:px-[28px] max-[760px]:px-[18px] max-[760px]:pt-[24px] max-[760px]:pb-[74px]">
+    <main className="content">
       <PageHeader eyebrow="Conta e preferências" title="Perfil" />
 
-      <div className="grid grid-cols-[minmax(220px,0.52fr)_minmax(420px,1.48fr)] items-start gap-[18px] max-[800px]:grid-cols-1">
-        <section className="min-h-[320px] rounded-[16px] border border-border bg-card p-[27px] shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_16px_-3px_rgba(15,23,42,0.04)] max-[800px]:min-h-0 max-[800px]:p-[21px]">
-          <div className="grid size-[70px] place-items-center rounded-[22px] border-[5px] border-primary/15 bg-primary/20 font-mono text-[19px] font-bold text-primary">{initials(draft.nome)}</div>
-          <h2 className="mt-[23px] mb-[5px] font-display text-[21px] font-bold tracking-[-0.05em] text-foreground">{draft.nome}</h2>
-          <p className="m-0 text-[12px] text-muted-foreground">{draft.cargo}</p>
-          <span className="mt-[19px] inline-flex items-center gap-[5px] rounded-[8px] bg-primary/10 px-[9px] py-[6px] text-[10px] font-bold text-primary">
-            <ShieldCheck size={13} />
-            Acesso administrador
-          </span>
-          <div className="mt-[48px] flex items-start gap-[9px] border-t border-border pt-[15px] text-[10px] leading-[1.5] text-muted-foreground [&_svg]:shrink-0 [&_svg]:text-muted-foreground max-[800px]:mt-[24px]">
-            <Settings2 size={16} />
-            <span>Preferências salvas localmente.</span>
+      <div className="grid grid-cols-[240px_1fr] max-[800px]:grid-cols-1 gap-[18px] items-start">
+        {/* Profile Intro Card */}
+        <section className="p-[20px] rounded-[16px] border border-[rgba(16,42,34,0.08)] bg-white shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_16px_-3px_rgba(15,23,42,0.04)]">
+          <div className="grid place-items-center w-[54px] h-[54px] rounded-[16px] border-[3.5px] border-[#e3efea] bg-[#c5dfcf] text-[#246747] font-bold text-[16px] font-mono">
+            {initials(draft.nome || 'U')}
           </div>
+          <h2 className="mt-[14px] mb-[6px] text-[#183e30] font-bold text-[18px] font-display tracking-[-0.04em]">
+            {draft.nome}
+          </h2>
+          {draft.tipoAcesso && (
+            <span className="inline-flex items-center gap-[5px] mt-[6px] py-[5px] px-[8px] rounded-[6px] bg-[#e5f1e9] text-[#317053] text-[10px] font-bold">
+              <ShieldCheck size={13} />
+              Acesso {draft.tipoAcesso}
+            </span>
+          )}
         </section>
 
-        <form className="rounded-[16px] border border-border bg-card p-[27px] shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_16px_-3px_rgba(15,23,42,0.04)] max-[800px]:p-[21px]" onSubmit={save}>
-          <div className="flex items-start justify-between gap-[18px] border-b border-border pb-[20px]">
+        {/* Settings Card */}
+        <form
+          className="p-[27px] max-[800px]:p-[21px] rounded-[16px] border border-[rgba(16,42,34,0.08)] bg-white shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_16px_-3px_rgba(15,23,42,0.04)]"
+          onSubmit={save}
+        >
+          <div className="flex items-start justify-between gap-[18px] pb-[20px] border-b border-[#e2eaeb]">
             <div>
-              <p className="mt-0 mb-[8px] font-mono text-[10px] tracking-[0.13em] text-muted-foreground uppercase">Dados pessoais</p>
-              <h2 className="m-0 font-display text-[18px] font-bold tracking-[-0.045em] text-foreground">Como podemos chamar você?</h2>
+              <p className="eyebrow">Dados do responsável</p>
+              <h2 className="m-0 text-[#1c4435] font-bold text-[18px] font-display tracking-[-0.045em]">
+                Informações cadastrais
+              </h2>
             </div>
             {saved && (
-              <span className="inline-flex items-center gap-[5px] rounded-[7px] bg-primary/10 px-[9px] py-[6px] font-mono text-[10px] text-primary">
+              <span className="inline-flex items-center gap-[5px] py-[6px] px-[9px] rounded-[7px] bg-[#e3f0e7] text-[#347553] text-[10px] font-mono">
                 <Check size={14} />
                 Salvo com sucesso
               </span>
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-x-[16px] gap-y-[19px] pt-[24px] pb-[28px] max-[800px]:grid-cols-1 max-[800px]:gap-[16px]">
-            <label className={fieldLabelClass}>
+          <div className="grid grid-cols-2 max-[800px]:grid-cols-1 gap-x-[16px] gap-y-[19px] py-[24px] pb-[28px]">
+            <label className="flex flex-col gap-[7px] text-[#315b4a] text-[11px] font-bold tracking-[0.02em]">
               Nome completo
-              <input className={fieldInputClass} value={draft.nome} onChange={(e) => update('nome', e.target.value)} />
+              <input
+                value={draft.nome}
+                onChange={(e) => update('nome', e.target.value)}
+                required
+                className="w-full h-[44px] box-border px-[14px] rounded-[11px] border border-[#d9e3e6] bg-[#fbfcfc] text-[#1b4d3b] text-[13px] font-medium outline-none transition-all placeholder:text-[#9aa9ac] focus:border-[#61937d] focus:bg-white focus:ring-3 focus:ring-[#317d56]/15"
+              />
             </label>
-            <label className={fieldLabelClass}>
+            <label className="flex flex-col gap-[7px] text-[#315b4a] text-[11px] font-bold tracking-[0.02em]">
               E-mail corporativo
-              <input className={fieldInputClass} type="email" value={draft.email} onChange={(e) => update('email', e.target.value)} />
+              <input
+                type="email"
+                value={draft.email}
+                onChange={(e) => update('email', e.target.value)}
+                required
+                className="w-full h-[44px] box-border px-[14px] rounded-[11px] border border-[#d9e3e6] bg-[#fbfcfc] text-[#1b4d3b] text-[13px] font-medium outline-none transition-all placeholder:text-[#9aa9ac] focus:border-[#61937d] focus:bg-white focus:ring-3 focus:ring-[#317d56]/15"
+              />
             </label>
-            <label className={fieldLabelClass}>
+            <label className="flex flex-col gap-[7px] text-[#315b4a] text-[11px] font-bold tracking-[0.02em]">
               Cargo
-              <input className={fieldInputClass} value={draft.cargo} onChange={(e) => update('cargo', e.target.value)} />
+              <input
+                value={draft.cargo}
+                onChange={(e) => update('cargo', e.target.value)}
+                required
+                className="w-full h-[44px] box-border px-[14px] rounded-[11px] border border-[#d9e3e6] bg-[#fbfcfc] text-[#1b4d3b] text-[13px] font-medium outline-none transition-all placeholder:text-[#9aa9ac] focus:border-[#61937d] focus:bg-white focus:ring-3 focus:ring-[#317d56]/15"
+              />
             </label>
-            <label className={fieldLabelClass}>
+            <label className="flex flex-col gap-[7px] text-[#315b4a] text-[11px] font-bold tracking-[0.02em]">
               Empresa
-              <input className={fieldInputClass} value={draft.empresa} onChange={(e) => update('empresa', e.target.value)} />
+              <input
+                value={draft.empresa}
+                onChange={(e) => update('empresa', e.target.value)}
+                required
+                className="w-full h-[44px] box-border px-[14px] rounded-[11px] border border-[#d9e3e6] bg-[#fbfcfc] text-[#1b4d3b] text-[13px] font-medium outline-none transition-all placeholder:text-[#9aa9ac] focus:border-[#61937d] focus:bg-white focus:ring-3 focus:ring-[#317d56]/15"
+              />
             </label>
-            <label className={fieldLabelClass}>
-              Telefone
-              <input className={fieldInputClass} value={draft.telefone} onChange={(e) => update('telefone', e.target.value)} />
+            <label className="flex flex-col gap-[7px] text-[#315b4a] text-[11px] font-bold tracking-[0.02em]">
+              Contato
+              <input
+                value={draft.telefone}
+                onChange={(e) => update('telefone', e.target.value)}
+                placeholder="+55 11 99999-9999"
+                className="w-full h-[44px] box-border px-[14px] rounded-[11px] border border-[#d9e3e6] bg-[#fbfcfc] text-[#1b4d3b] text-[13px] font-medium outline-none transition-all placeholder:text-[#9aa9ac] focus:border-[#61937d] focus:bg-white focus:ring-3 focus:ring-[#317d56]/15"
+              />
             </label>
           </div>
 
-          <div className="flex justify-end gap-[9px] border-t border-border pt-[18px]">
-            <Button
+          <div className="flex justify-end gap-[9px] pt-[18px] border-t border-[#e2eaeb]">
+            <button
               type="button"
-              variant="outline"
-              className="h-8 rounded-[9px] border-input px-[10px] text-xs font-semibold text-muted-foreground hover:text-primary"
+              className="quiet-btn"
               onClick={() => {
                 setDraft(profile);
                 setSaved(false);
               }}
             >
               Cancelar
-            </Button>
-            <Button type="submit" className="h-[38px] gap-[7px] rounded-[11px] px-[15px] text-xs font-semibold shadow-[0_5px_12px_rgba(32,95,67,0.12)] hover:-translate-y-0.5">
+            </button>
+            <button type="submit" className="primary-btn" disabled={isSaving}>
               <Check size={16} />
-              Salvar alterações
-            </Button>
+              {isSaving ? 'Salvando...' : 'Salvar alterações'}
+            </button>
           </div>
         </form>
       </div>

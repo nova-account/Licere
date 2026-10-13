@@ -80,6 +80,17 @@ const usuariosData = [
     telefone: '+55 41 98765-4321',
     centroId: 'cd-curitiba',
   },
+  {
+    id: 'usr-eduardo',
+    nome: 'Eduardo Lima',
+    email: 'eduardo.lima@operacoesbrasil.com.br',
+    senha: 'licere123',
+    cargo: 'Especialista em Emissões Atmosféricas',
+    tipoAcesso: 'Analista',
+    empresa: 'Operações Brasil',
+    telefone: '+55 11 98456-1234',
+    centroId: 'cd-sp',
+  },
 ];
 
 async function seed() {

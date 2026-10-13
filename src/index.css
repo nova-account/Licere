@@ -49,14 +49,13 @@
       [ ] Substituiu as classes legadas por classes Tailwind no JSX (sem classes antigas órfãs).
       [ ] Usou os tokens semânticos (bg-card, text-foreground) em vez de cores hexadecimais fixas.
       [ ] Esvaziou o conteúdo dos seus arquivos .css (mantendo o arquivo físico vazio).
-      [ ] Testou visualmente a tela alternando entre temas Claro e Escuro.
+      [ ] Testou visualmente a tela nos tamanhos desktop e mobile.
       [ ] Rodou "npm run typecheck" e "npm run build" com código 0.
    ───────────────────────────────────────────────────────────────────────────── */
 
 /* ── CONFIGURAÇÃO GLOBAL (NÃO APAGAR!) ── */
 /* [OBRIGATÓRIO MANTER - NINGUÉM APAGA ESTE ARQUIVO!] */
 @import "./styles/globals.css";
-
 
 /* ── 1. RESPONSÁVEL: PEDRO ── */
 /* ⚠️ ALERTA: shell.css tem .eyebrow e .text-link usados globalmente. Migre direto no JSX! */

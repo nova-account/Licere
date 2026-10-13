@@ -1,13 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import {
   ChevronRight,
   ClipboardCheck,
   FolderOpen,
-  Leaf,
-  MoreHorizontal,
   ShieldCheck,
   Building2,
   X,
@@ -18,6 +16,9 @@ import { PageHeader, initials } from '@/shared/ui';
 import { Metric } from '@/components/dashboard/Metric';
 import { RiskChart } from '@/components/dashboard/RiskChart';
 import { PriorityList } from '@/components/dashboard/PriorityList';
+import { CentersCard } from '@/components/dashboard/CentersCard';
+import { ActivityCard } from '@/components/dashboard/ActivityCard';
+import { ActivityHistoryDrawer } from '@/components/modals/ActivityHistoryDrawer';
 import { useAppData } from '@/lib/AppDataContext';
 import { getDocumentStatus } from '@/shared/utils';
 
@@ -32,6 +33,7 @@ export default function DashboardPage() {
   } = useAppData();
 
   const [notice, setNotice] = useState(true);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   // Cálculos em tempo real conforme as regras de negócio do projeto
   const ativasCount = centros.filter((c) => c.status === 'Ativa').length;
@@ -43,10 +45,53 @@ export default function DashboardPage() {
   ).length;
   const totalPendencias = docsPendentes + tarefasPendentes;
 
+  // Atividades recentes dinâmicas geradas com base nos dados do acervo
+  const recentActivities = useMemo(() => {
+    const list: Array<{
+      id: string;
+      person: string;
+      action: string;
+      target: string;
+      subtitle: string;
+      avatarTone: string;
+      item: any;
+    }> = [];
+
+    // 1. Documentos do acervo
+    documentos.slice(0, 3).forEach((doc) => {
+      const center = centros.find((c) => c.id === doc.centroId);
+      list.push({
+        id: `doc-${doc.id}`,
+        person: center?.responsavel || 'Equipe Técnica',
+        action: 'atualizou o documento',
+        target: doc.nome,
+        subtitle: `${doc.categoria} · ${center?.nome || 'Unidade Geral'}`,
+        avatarTone: 'default',
+        item: doc,
+      });
+    });
+
+    // 2. Condicionantes / Tarefas
+    condicionantes.slice(0, 2).forEach((cond) => {
+      const center = centros.find((c) => c.id === cond.centroId);
+      list.push({
+        id: `cond-${cond.id}`,
+        person: cond.responsavel || 'Responsável',
+        action: cond.status === 'Concluída' ? 'concluiu a tarefa' : 'monitorando a tarefa',
+        target: cond.titulo,
+        subtitle: `${center?.nome || 'Operação'} · Prazo ${cond.prazo}`,
+        avatarTone: 'default',
+        item: cond,
+      });
+    });
+
+    return list.slice(0, 5);
+  }, [documentos, condicionantes, centros]);
+
   return (
     <main className="content">
       <PageHeader
-        eyebrow={`${workspace?.nome || 'Operações Brasil'} · Gestão Corporativa`}
+        eyebrow={workspace?.nome ? `${workspace.nome} · Gestão Corporativa` : 'Gestão Corporativa'}
         title="Painel Central de Indicadores"
       />
 
@@ -121,78 +166,19 @@ export default function DashboardPage() {
       </div>
 
       <div className="lower-grid animate-rise">
-        <div className="centers-card">
-          <div className="card-heading">
-            <div>
-              <p className="eyebrow">Rede operacional</p>
-              <h2>Unidades</h2>
-            </div>
-            <Link href="/unidades" className="text-link">
-              Ver unidades ({centros.length}) <ChevronRight size={14} />
-            </Link>
-          </div>
-          <div className="centers-table">
-            {centros.slice(0, 5).map((center) => (
-              <button
-                className="center-row"
-                onClick={() => openDetail(center)}
-                key={center.id}
-                data-testid={`button-center-${center.id}`}
-              >
-                <span className="center-symbol">{initials(center.nome)}</span>
-                <span>
-                  <b>{center.nome}</b>
-                  <small>
-                    {center.cidade} — {center.estado}
-                  </small>
-                </span>
-                <span className="center-owner">{center.responsavel}</span>
-                <StatusPill status={center.status} />
-                <ChevronRight size={15} />
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="activity-card">
-          <div className="card-heading">
-            <div>
-              <p className="eyebrow">Registro</p>
-              <h2>Atividade recente</h2>
-            </div>
-            <button
-              className="icon-btn"
-              onClick={() => setNotice(true)}
-              aria-label="ver atividade recente"
-            >
-              <MoreHorizontal size={18} />
-            </button>
-          </div>
-          <div className="activity-list">
-            <div>
-              <span className="activity-avatar avatar-olive">BL</span>
-              <p>
-                <b>Bianca Lima</b> atualizou o <strong>PGRS — CD Extrema</strong>
-                <small>Há 32 min · Documentos</small>
-              </p>
-            </div>
-            <div>
-              <span className="activity-avatar avatar-sand">RN</span>
-              <p>
-                <b>Ricardo Nunes</b> concluiu uma tarefa
-                <small>Há 2 h · CD Jundiaí</small>
-              </p>
-            </div>
-            <div>
-              <span className="activity-avatar avatar-blue">HS</span>
-              <p>
-                <b>Helena Souza</b> adicionou uma evidência
-                <small>Ontem · Licença SEMAD-GO</small>
-              </p>
-            </div>
-          </div>
-        </div>
+        <CentersCard centros={centros} onOpen={openDetail} />
+        <ActivityCard
+          activities={recentActivities}
+          onOpen={openDetail}
+          onViewAll={() => setHistoryOpen(true)}
+        />
       </div>
+
+      <ActivityHistoryDrawer
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        onOpenItem={openDetail}
+      />
     </main>
   );
 }

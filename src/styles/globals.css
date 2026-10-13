@@ -1,8 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
+@source "../app";
+@source "../components";
+@source "../shared";
 
-@custom-variant dark (&:is(.dark *));
+
 
 @theme inline {
   --color-background: hsl(var(--background));
@@ -84,23 +87,7 @@
   --shadow-popover: 0 10px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.06);
 }
 
-.dark {
-  --background: 166 45% 6%;
-  --foreground: 150 18% 95%;
-  --border: 166 25% 15%;
-  --input: 166 25% 18%;
-  --card: 166 35% 9%;
-  --card-foreground: 150 18% 95%;
-  --card-border: 166 25% 15%;
-  --muted: 166 25% 13%;
-  --muted-foreground: 150 14% 68%;
-  --secondary: 166 25% 14%;
-  --secondary-foreground: 150 20% 95%;
-  --sidebar: 166 48% 6%;
-  --sidebar-foreground: 150 20% 95%;
-  --sidebar-border: 166 25% 12%;
-  --sidebar-accent: 166 35% 12%;
-}
+
 
 /* ── Reset & base ── */
 * {
@@ -109,7 +96,6 @@
 
 html {
   background: #f8f9fa;
-  overflow-x: hidden;
 }
 
 body {
@@ -119,7 +105,43 @@ body {
   color: hsl(var(--foreground));
   font-family: var(--app-font-sans);
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+}
+
+/* Scrollbar moderno e limpo sem trilho/faixa visível na lateral */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c8d6d2;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ab3ab;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c8d6d2 transparent;
+}
+
+/* Evita que o bloqueio de scroll do Radix duplique scrollbars ou esprema/desloque o layout */
+html body[data-scroll-locked] {
+  overflow: visible !important;
+  margin-right: 0 !important;
+  padding-right: 0 !important;
+  position: static !important;
+}
+
+/* Quando um drawer lateral ou modal está aberto, preserva a fixação sticky do topbar sem quebrar o scroll */
+body.drawer-open {
+  overscroll-behavior: contain;
 }
 
 button,
@@ -143,10 +165,7 @@ button {
 }
 
 button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
+a:focus-visible {
   outline: 3px solid rgba(41, 113, 81, 0.24);
   outline-offset: 2px;
 }
@@ -156,9 +175,13 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
-button:active:not(:disabled) {
-  transform: scale(0.985);
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
 }
+
+button:active:not(:disabled) {}
 
 /* ── Typography utilities ── */
 .font-display {
@@ -183,6 +206,7 @@ button:active:not(:disabled) {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -190,11 +214,17 @@ button:active:not(:disabled) {
 }
 
 @keyframes fade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {

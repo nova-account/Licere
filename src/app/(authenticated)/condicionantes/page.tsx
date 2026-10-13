@@ -1,36 +1,23 @@
 'use client';
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { CalendarDays, Check, ChevronRight } from 'lucide-react';
-import type { Condicionante, DetailItem, Licenca } from '@/shared/types';
+import type { Condicionante } from '@/shared/types';
 
 import { StatusPill } from '@/components/shared/status-pill';
-import { PageHeader, initials } from '@/shared/ui';
+import { PageHeader, Avatar } from '@/shared/ui';
 import { cn } from '@/lib/utils';
-import { FilterBar, ListHeader, EmptyState, useQuerySearch } from '@/components/layout/list-controls';
+import { FilterBar, ListHeader, EmptyState, ListSkeleton, useQuerySearch } from '@/components/layout/list-controls';
 import { NovaCondicionanteModal } from '@/components/modals/NovaCondicionanteModal';
 import { ConfirmModal } from '@/components/modals/ConfirmModal';
-
-const centerName = (id: string, centrosList: any[]) => centrosList.find((c: any) => c.id === id)?.nome ?? id;
-
-const licenseName = (id: string, list: any[]) => list.find((l: any) => l.id === id)?.numero ?? 'Licença não localizada';
-
-const formatDate = (value: string) => {
-  if (!value) return '';
-  const [y, m, d] = value.split('-');
-  if (!d) return value;
-  return `${d}/${m}/${y}`;
-};
-
 import { useAppData } from '@/lib/AppDataContext';
+import { formatDate, centerName, licenseName } from '@/shared/utils';
 
 export default function CondicionantesPage() {
-  const { condicionantes: items, setCondicionantes: setItems, licencas, setDetail: openDetail, centros } = useAppData();
+  const { condicionantes: items, licencas, setDetail: openDetail, centros, isLoaded, saveDetail } = useAppData();
 
-  const querySearch = useQuerySearch();
-  const [search, setSearch] = useState(querySearch);
+  const [search, setSearch] = useState('');
+  useQuerySearch(setSearch);
   const [filter, setFilter] = useState('Todos');
-  const router = useRouter();
 
   const filtered = items.filter(
     (i) =>
@@ -44,13 +31,7 @@ export default function CondicionantesPage() {
 
   const toggle = (item: Condicionante) => {
     if (item.status === 'Concluída') {
-      setItems((old) =>
-        old.map((current) =>
-          current.id === item.id
-            ? { ...current, status: 'Pendente' }
-            : current,
-        ),
-      );
+      saveDetail({ ...item, status: 'Pendente' });
     } else {
       setConfirmItem(item);
     }
@@ -58,13 +39,7 @@ export default function CondicionantesPage() {
 
   const confirmToggle = () => {
     if (!confirmItem) return;
-    setItems((old) =>
-      old.map((current) =>
-        current.id === confirmItem.id
-          ? { ...current, status: 'Concluída' }
-          : current,
-      ),
-    );
+    saveDetail({ ...confirmItem, status: 'Concluída' });
     setConfirmItem(null);
   };
 
@@ -97,78 +72,96 @@ export default function CondicionantesPage() {
         />
         <ListHeader
           count={filtered.length}
-          label="obrigações monitoradas"
+          label={!isLoaded ? 'carregando...' : 'obrigações monitoradas'}
         />
-        <div className="condition-list">
-          {filtered.map((item) => (
-            <div
-              className="condition-row"
-              key={item.id}
-              data-testid={`row-condicionante-${item.id}`}
-            >
-              <button
-                className={cn(
-                  'check-box',
-                  item.status === 'Concluída' && 'check-box-done',
-                )}
-                onClick={() => toggle(item)}
-                aria-label={`marcar ${item.titulo}`}
-              >
-                {item.status === 'Concluída' && <Check size={14} />}
-              </button>
-              <button
-                className="condition-main"
-                onClick={() => openDetail(item)}
-              >
-                <span>
-                  <b
-                    className={
-                      item.status === 'Concluída' ? 'condition-done' : ''
-                    }
-                  >
-                    {item.titulo}
-                  </b>
-                  <small>
-                    {centerName(item.centroId, centros)} ·{' '}
-                    {licenseName(item.licencaId, licencas)}
-                  </small>
-                </span>
-                <span className="condition-responsible">
-                  <span className="initial-avatar">
-                    {initials(item.responsavel)}
-                  </span>
-                  {item.responsavel}
-                </span>
-                <span
-                  className={cn(
-                    'condition-deadline',
-                    item.status === 'Pendente' && 'deadline-soon',
-                  )}
-                >
-                  <CalendarDays size={14} />
-                  {formatDate(item.prazo)}
-                </span>
-                <StatusPill status={item.status} />
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          ))}
-        </div>
-        {filtered.length === 0 && (
+        {!isLoaded ? (
+          <ListSkeleton variant="condition" rows={5} />
+        ) : items.length === 0 ? (
           <EmptyState
-            title="Tudo limpo por aqui"
-            description="Nenhuma condicionante encontrada."
-            onClear={() => {
-              setSearch('');
-              setFilter('Todos');
-            }}
+            title="Nenhuma condicionante cadastrada"
+            description="Adicione condicionantes e obrigações para acompanhar as rotinas de conformidade ambiental."
+            actionLabel="Nova condicionante"
+            onAction={add}
           />
+        ) : (
+          <>
+            <div className="condition-list">
+              {filtered.map((item) => (
+                <div
+                  className="condition-row"
+                  key={item.id}
+                  data-testid={`row-condicionante-${item.id}`}
+                >
+                  <button
+                    className={cn(
+                      'check-box',
+                      item.status === 'Concluída' && 'check-box-done',
+                    )}
+                    onClick={() => toggle(item)}
+                    aria-label={`marcar ${item.titulo}`}
+                  >
+                    {item.status === 'Concluída' && <Check size={14} />}
+                  </button>
+                  <button
+                    className="condition-main"
+                    onClick={() => openDetail(item)}
+                  >
+                    <span>
+                      <b
+                        className={
+                          item.status === 'Concluída' ? 'condition-done' : ''
+                        }
+                      >
+                        {item.titulo}
+                      </b>
+                      <small>
+                        {centerName(item.centroId, centros)} ·{' '}
+                        {licenseName(item.licencaId, licencas)}
+                      </small>
+                    </span>
+                    <span className="condition-responsible">
+                      <Avatar name={item.responsavel} size="xs" shape="circle" />
+                      {item.responsavel}
+                    </span>
+                    <span
+                      className={cn(
+                        'condition-deadline',
+                        item.status === 'Pendente' && 'deadline-soon',
+                      )}
+                    >
+                      <CalendarDays size={14} />
+                      {formatDate(item.prazo)}
+                    </span>
+                    <StatusPill status={item.status} />
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            {filtered.length === 0 && (
+              <EmptyState
+                title="Tudo limpo por aqui"
+                description="Nenhuma condicionante encontrada para os critérios de busca ou filtros aplicados."
+                clearLabel={
+                  search.trim() && filter !== 'Todos'
+                    ? 'Limpar busca e filtros'
+                    : search.trim()
+                      ? 'Limpar busca'
+                      : 'Limpar filtros'
+                }
+                onClear={() => {
+                  setSearch('');
+                  setFilter('Todos');
+                }}
+              />
+            )}
+          </>
         )}
       </div>
       <NovaCondicionanteModal
         open={addOpen}
         onClose={() => setAddOpen(false)}
-        onSave={(nova) => setItems((prev) => [nova, ...prev])}
+        onSave={(nova) => saveDetail(nova)}
         licencas={licencas}
       />
       <ConfirmModal

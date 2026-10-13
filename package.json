@@ -8,7 +8,11 @@
     "build": "next build",
     "serve": "next start --hostname 0.0.0.0 --port 5173",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "jest"
+    "test": "jest",
+    "db:seed": "node prisma/seed.mjs"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

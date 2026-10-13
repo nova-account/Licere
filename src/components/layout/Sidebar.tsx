@@ -9,13 +9,13 @@ import {
   LayoutDashboard,
   ListTodo,
   LogOut,
-  MoreHorizontal,
   ShieldCheck,
   X,
 } from 'lucide-react';
 import { Mark, initials } from '@/shared/ui';
 import { cn } from '@/lib/utils';
 import { useAppData } from '@/lib/AppDataContext';
+import { endSession } from '@/lib/session';
 
 export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const pathname = usePathname();
@@ -23,9 +23,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
   const { centros, condicionantes, workspace, user } = useAppData();
 
   const handleLogout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('licere_auth_user');
-    }
+    endSession();
     onClose();
     router.replace('/login');
   };
@@ -65,17 +63,17 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
         <button
           aria-label="fechar menu"
           onClick={onClose}
-          className="icon-btn sidebar-close-btn"
+          className="icon-btn sidebar-close-btn shrink-0"
         >
           <X size={17} />
         </button>
       </div>
 
-      <div className="workspace-switcher" title={workspaceName}>
-        <span className="workspace-avatar">{workspaceAvatar}</span>
-        <span>
-          <b>{workspaceName}</b>
-          <small>{workspace?.tipo || 'Acesso Corporativo'}</small>
+      <div className="workspace-switcher min-w-0" title={workspaceName}>
+        <span className="workspace-avatar shrink-0">{workspaceAvatar}</span>
+        <span className="min-w-0 flex-1 overflow-hidden">
+          <b className="truncate block">{workspaceName}</b>
+          <small className="truncate block">{workspace?.tipo || 'Acesso Corporativo'}</small>
         </span>
       </div>
 
@@ -126,21 +124,21 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
           <Link
             href="/perfil"
             onClick={onClose}
-            className="profile"
+            className="profile min-w-0 flex-1"
             data-testid="link-profile"
           >
-            <span className="profile-avatar">
+            <span className="profile-avatar shrink-0">
               {user?.nome ? initials(user.nome) : 'U'}
             </span>
-            <span>
-              <b>{user?.nome || 'Usuário'}</b>
-              <small>{user?.cargo || 'Acesso ativo'}</small>
+            <span className="min-w-0 flex-1 overflow-hidden">
+              <b className="truncate block">{user?.nome || 'Usuário'}</b>
+              <small className="truncate block">{user?.cargo || 'Acesso ativo'}</small>
             </span>
           </Link>
           <button
             type="button"
             onClick={handleLogout}
-            className="logout-icon-btn"
+            className="logout-icon-btn shrink-0"
             title="Encerrar sessão"
             aria-label="Encerrar sessão"
           >

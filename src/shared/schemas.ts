@@ -16,7 +16,7 @@ export const statusSchema = z.enum([
   'Operando',
   'Em expansão',
   'Ativa',
-  'Inativa'
+  'Inativa',
 ]);
 
 export const centroStatusSchema = z.enum(['Ativa', 'Inativa']);
@@ -26,11 +26,13 @@ export const centroFormSchema = z.object({
   cidade: z.string().min(1, 'Cidade é obrigatória'),
   estado: z.string().min(2, 'Estado inválido'),
   responsavel: z.string().min(3, 'Responsável é obrigatório'),
-  status: centroStatusSchema,
+  status: centroStatusSchema.default('Ativa'),
 });
 
 export const centroSchema = centroFormSchema.extend({
   id: z.string(),
+  createdAt: z.date().or(z.string()).optional(),
+  updatedAt: z.date().or(z.string()).optional(),
 });
 
 export const licencaFormSchema = z.object({
@@ -41,12 +43,14 @@ export const licencaFormSchema = z.object({
   emissao: z.string().min(1, 'Data de emissão é obrigatória'),
   vencimento: z.string().min(1, 'Data de vencimento é obrigatória'),
   status: statusSchema,
-  criticidade: z.enum(['Alta', 'Média', 'Baixa']),
-  observacao: z.string().optional().default(''),
+  criticidade: z.enum(['Alta', 'Média', 'Baixa']).or(z.string()).default('Média'),
+  observacao: z.string().nullable().optional().default(''),
 });
 
 export const licencaSchema = licencaFormSchema.extend({
   id: z.string(),
+  createdAt: z.date().or(z.string()).optional(),
+  updatedAt: z.date().or(z.string()).optional(),
 });
 
 export const condicionanteFormSchema = z.object({
@@ -61,19 +65,64 @@ export const condicionanteFormSchema = z.object({
 
 export const condicionanteSchema = condicionanteFormSchema.extend({
   id: z.string(),
+  createdAt: z.date().or(z.string()).optional(),
+  updatedAt: z.date().or(z.string()).optional(),
 });
 
 export const documentoFormSchema = z.object({
-  nome: z.string().min(1, 'Nome do arquivo é obrigatório'),
+  nome: z
+    .string()
+    .min(1, 'Nome do arquivo é obrigatório')
+    .refine((val) => !val.includes('..') && !val.includes('/') && !val.includes('\\'), {
+      message: 'Nome de arquivo inválido: não deve conter caminhos ou barras',
+    })
+    .refine((val) => !/[<>:"|?*\x00-\x1F]/.test(val), {
+      message: 'Nome de arquivo contém caracteres proibidos',
+    }),
   categoria: z.string().min(1, 'Categoria é obrigatória'),
   centroId: z.string().min(1, 'Unidade é obrigatória'),
-  atualizadoEm: z.string(),
+  atualizadoEm: z.string().optional().default(''),
   validade: z.string().min(1, 'Validade é obrigatória'),
-  tamanho: z.string(),
-  licencaId: z.string().optional(),
-  condicionanteId: z.string().optional(),
+  tamanho: z.string().optional().default('1.5 MB'),
+  licencaId: z.string().nullable().optional(),
+  condicionanteId: z.string().nullable().optional(),
 });
 
 export const documentoSchema = documentoFormSchema.extend({
   id: z.string(),
+  createdAt: z.date().or(z.string()).optional(),
+  updatedAt: z.date().or(z.string()).optional(),
+});
+
+export const tipoAcessoSchema = z.enum(['Administrador', 'Gestor', 'Analista', 'Auditor']);
+
+export const usuarioSchema = z.object({
+  id: z.string(),
+  nome: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
+  email: z.string().min(1, 'O e-mail corporativo é obrigatório').email('Informe um e-mail corporativo válido'),
+  cargo: z.string().min(2, 'Cargo é obrigatório'),
+  tipoAcesso: tipoAcessoSchema,
+  empresa: z.string().min(2, 'Empresa é obrigatória'),
+  telefone: z.string().nullable().optional(),
+  centroId: z.string().nullable().optional(),
+});
+
+// Campos que o próprio usuário pode editar na página de perfil.
+export const perfilFormSchema = usuarioSchema.pick({
+  nome: true,
+  email: true,
+  cargo: true,
+  empresa: true,
+  telefone: true,
+});
+
+export const loginSchema = z.object({
+  email: z
+    .string()
+    .min(1, 'O e-mail corporativo é obrigatório.')
+    .email('Informe um e-mail corporativo válido (ex: nome@empresa.com.br).'),
+  password: z
+    .string()
+    .min(1, 'A senha de acesso é obrigatória.')
+    .min(6, 'A senha deve conter no mínimo 6 caracteres.'),
 });

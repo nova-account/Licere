@@ -11,6 +11,7 @@ import { NovoDocumentoModal } from '@/components/modals/NovoDocumentoModal';
 import { NovaLicencaModal } from '@/components/modals/NovaLicencaModal';
 import { NovaUnidadeModal } from '@/components/modals/NovaUnidadeModal';
 import { useAppData } from '@/lib/AppDataContext';
+import { getSessionUserId } from '@/lib/session';
 
 export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -18,8 +19,11 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
   const [activeModal, setActiveModal] = useState<QuickActionType | null>(null);
 
   useEffect(() => {
-    const auth = typeof window !== 'undefined' ? localStorage.getItem('licere_auth_user') : null;
-    if (!auth) {
+    const hasSession =
+      typeof window !== 'undefined'
+        ? getSessionUserId() || localStorage.getItem('licere_auth_user')
+        : null;
+    if (!hasSession) {
       router.replace('/login');
     } else {
       setIsAuthenticated(true);
@@ -33,7 +37,6 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
     setQuickAdd,
     detail,
     setDetail,
-    centros,
     setCentros,
     licencas,
     setLicencas,
@@ -46,21 +49,10 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
 
   if (isAuthenticated === null) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          height: '100vh',
-          width: '100%',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: '#f8faf9',
-          color: '#245b45',
-          fontFamily: 'sans-serif',
-        }}
-      >
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '20px', fontWeight: 700, letterSpacing: '-0.02em', marginBottom: '6px' }}>licere</div>
-          <div style={{ fontSize: '13px', color: '#688275' }}>Validando credenciais corporativas...</div>
+      <div className="flex h-screen w-full items-center justify-center bg-[#f8faf9] text-[#245b45] font-sans">
+        <div className="text-center">
+          <div className="text-[20px] font-bold tracking-[-0.02em] mb-1.5">licere</div>
+          <div className="text-[13px] text-[#688275]">Validando credenciais corporativas...</div>
         </div>
       </div>
     );
@@ -103,7 +95,7 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
         <NovaTarefaModal
           open
           onClose={() => setActiveModal(null)}
-          onSave={(nova) => setCondicionantes((prev) => [nova, ...prev])}
+          onSave={(nova) => saveDetail(nova)}
         />
       )}
 
@@ -111,7 +103,7 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
         <NovoDocumentoModal
           open
           onClose={() => setActiveModal(null)}
-          onSave={(novo) => setDocumentos((prev) => [novo, ...prev])}
+          onSave={(novo) => saveDetail(novo)}
         />
       )}
 
@@ -119,7 +111,7 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
         <NovaLicencaModal
           open
           onClose={() => setActiveModal(null)}
-          onSave={(nova) => setLicencas((prev) => [nova, ...prev])}
+          onSave={(nova) => saveDetail(nova)}
         />
       )}
 
@@ -127,7 +119,7 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
         <NovaUnidadeModal
           open
           onClose={() => setActiveModal(null)}
-          onSave={(nova) => setCentros((prev) => [nova, ...prev])}
+          onSave={(nova) => saveDetail(nova)}
         />
       )}
     </div>

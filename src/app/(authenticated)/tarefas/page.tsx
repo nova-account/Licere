@@ -1,53 +1,34 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
 import { CalendarDays, Check, ChevronRight } from 'lucide-react';
 import type { Condicionante } from '@/shared/types';
 import { StatusPill } from '@/components/shared/status-pill';
-import { PageHeader, initials } from '@/shared/ui';
+import { PageHeader, Avatar } from '@/shared/ui';
 import { cn } from '@/lib/utils';
-import { FilterBar, ListHeader, EmptyState, useQuerySearch } from '@/components/layout/list-controls';
+import { FilterBar, ListHeader, EmptyState, ListSkeleton, useQuerySearch } from '@/components/layout/list-controls';
 import { NovaTarefaModal } from '@/components/modals/NovaTarefaModal';
 import { ConfirmModal } from '@/components/modals/ConfirmModal';
 import { useAppData } from '@/lib/AppDataContext';
-
-const formatDate = (value: string) => {
-  if (!value) return '';
-  const [y, m, d] = value.split('-');
-  if (!d) return value;
-  return `${d}/${m}/${y}`;
-};
+import { formatDate, centerName, licenseName } from '@/shared/utils';
 
 export default function TarefasPage() {
   const {
     condicionantes: items,
-    setCondicionantes: setItems,
     licencas,
     centros,
+    isLoaded,
     setDetail: openDetail,
+    saveDetail,
   } = useAppData();
 
-  const querySearch = useQuerySearch();
-  const [search, setSearch] = useState(querySearch);
+  const [search, setSearch] = useState('');
+  useQuerySearch(setSearch);
   const [filter, setFilter] = useState('Todos');
-  const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 200);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const getUnitName = (id: string) =>
-    centros.find((center) => center.id === id)?.nome ?? id;
-
-  const licenseName = (id: string) =>
-    licencas.find((license) => license.id === id)?.numero ?? 'Licença ambiental';
 
   const filtered = items.filter(
     (item) =>
-      `${item.titulo} ${item.responsavel} ${getUnitName(item.centroId)}`
+      `${item.titulo} ${item.responsavel} ${centerName(item.centroId, centros)}`
         .toLowerCase()
         .includes(search.toLowerCase()) &&
       (filter === 'Todos' || item.status === filter),
@@ -57,13 +38,7 @@ export default function TarefasPage() {
 
   const toggle = (item: Condicionante) => {
     if (item.status === 'Concluída') {
-      setItems((old) =>
-        old.map((current) =>
-          current.id === item.id
-            ? { ...current, status: 'Pendente' }
-            : current,
-        ),
-      );
+      saveDetail({ ...item, status: 'Pendente' });
     } else {
       setConfirmItem(item);
     }
@@ -71,13 +46,7 @@ export default function TarefasPage() {
 
   const confirmToggle = () => {
     if (!confirmItem) return;
-    setItems((old) =>
-      old.map((current) =>
-        current.id === confirmItem.id
-          ? { ...current, status: 'Concluída' }
-          : current,
-      ),
-    );
+    saveDetail({ ...confirmItem, status: 'Concluída' });
     setConfirmItem(null);
   };
 
@@ -110,24 +79,34 @@ export default function TarefasPage() {
         />
         <ListHeader
           count={filtered.length}
-          label="tarefas monitoradas"
+          label={!isLoaded ? 'carregando...' : 'tarefas monitoradas'}
         />
 
-        {isLoading ? (
-          <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {[1, 2, 3, 4, 5].map((n) => (
-              <div
-                key={n}
-                style={{
-                  height: '56px',
-                  borderRadius: '8px',
-                  background: 'linear-gradient(90deg, #f0f3f1 25%, #e6ebe8 50%, #f0f3f1 75%)',
-                  backgroundSize: '200% 100%',
-                  animation: 'pulse 1.5s infinite ease-in-out',
-                }}
-              />
-            ))}
-          </div>
+        {!isLoaded ? (
+          <ListSkeleton variant="condition" rows={5} />
+        ) : items.length === 0 ? (
+          <EmptyState
+            title="Nenhuma tarefa cadastrada"
+            description="Cadastre tarefas e rotinas operacionais para a sua equipe acompanhar."
+            actionLabel="Nova tarefa"
+            onAction={add}
+          />
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            title="Nenhuma tarefa encontrada"
+            description="Nenhum resultado corresponde aos critérios de pesquisa ou filtros aplicados."
+            clearLabel={
+              search.trim() && filter !== 'Todos'
+                ? 'Limpar busca e filtros'
+                : search.trim()
+                  ? 'Limpar busca'
+                  : 'Limpar filtros'
+            }
+            onClear={() => {
+              setSearch('');
+              setFilter('Todos');
+            }}
+          />
         ) : (
           <div className="condition-list">
             {filtered.map((item) => (
@@ -159,14 +138,12 @@ export default function TarefasPage() {
                       {item.titulo}
                     </b>
                     <small>
-                      {getUnitName(item.centroId)} ·{' '}
-                      {licenseName(item.licencaId)}
+                      {centerName(item.centroId, centros)} ·{' '}
+                      {licenseName(item.licencaId, licencas, 'Licença ambiental')}
                     </small>
                   </span>
                   <span className="condition-responsible">
-                    <span className="initial-avatar">
-                      {initials(item.responsavel)}
-                    </span>
+                    <Avatar name={item.responsavel} size="xs" shape="circle" />
                     {item.responsavel}
                   </span>
                   <span
@@ -185,22 +162,11 @@ export default function TarefasPage() {
             ))}
           </div>
         )}
-
-        {!isLoading && filtered.length === 0 && (
-          <EmptyState
-            title="Nenhuma tarefa encontrada"
-            description="Ajuste a busca ou o filtro."
-            onClear={() => {
-              setSearch('');
-              setFilter('Todos');
-            }}
-          />
-        )}
       </div>
       <NovaTarefaModal
         open={addOpen}
         onClose={() => setAddOpen(false)}
-        onSave={(nova) => setItems((prev) => [nova, ...prev])}
+        onSave={(nova) => saveDetail(nova)}
       />
       <ConfirmModal
         open={!!confirmItem}

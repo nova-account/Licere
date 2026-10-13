@@ -3,17 +3,39 @@ import {
   statusSchema,
   centroStatusSchema,
   centroSchema,
+  centroFormSchema,
   licencaSchema,
+  licencaFormSchema,
   condicionanteSchema,
-  documentoSchema
+  condicionanteFormSchema,
+  documentoSchema,
+  documentoFormSchema,
+  usuarioSchema,
+  perfilFormSchema,
+  loginSchema,
+  tipoAcessoSchema,
 } from './schemas';
 
 export type Status = z.infer<typeof statusSchema>;
 export type CentroStatus = z.infer<typeof centroStatusSchema>;
+export type TipoAcesso = z.infer<typeof tipoAcessoSchema>;
+
 export type Centro = z.infer<typeof centroSchema>;
+export type CentroFormData = z.infer<typeof centroFormSchema>;
+
 export type Licenca = z.infer<typeof licencaSchema>;
+export type LicencaFormData = z.infer<typeof licencaFormSchema>;
+
 export type Condicionante = z.infer<typeof condicionanteSchema>;
+export type CondicionanteFormData = z.infer<typeof condicionanteFormSchema>;
+
 export type Documento = z.infer<typeof documentoSchema>;
+export type DocumentoFormData = z.infer<typeof documentoFormSchema>;
+
+export type Usuario = z.infer<typeof usuarioSchema>;
+export type PerfilFormData = z.infer<typeof perfilFormSchema>;
+
+export type LoginFormData = z.infer<typeof loginSchema>;
 
 export type DetailItem = Licenca | Condicionante | Documento | Centro;
 

@@ -52,7 +52,7 @@ export function RiskChart() {
         <span className="chart-note">18 itens monitorados</span>
       </div>
       
-      <div className="chart-wrap" style={{ height: '250px', width: '100%', paddingTop: '10px' }}>
+      <div className="chart-wrap h-[250px] w-full pt-2.5">
         <ChartContainer config={chartConfig} className="h-full w-full">
           <AreaChart
             accessibilityLayer
@@ -87,53 +87,22 @@ export function RiskChart() {
                 const item = payload[0];
                 return (
                   <div
-                    style={{
-                      background: '#ffffff',
-                      border: '1px solid rgba(16, 42, 34, 0.12)',
-                      borderRadius: '8px',
-                      padding: '8px 14px',
-                      boxShadow: '0 4px 14px rgba(0, 0, 0, 0.08)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      textAlign: 'center',
-                      gap: '4px',
-                      minWidth: '120px',
-                    }}
+                    className="bg-white border border-[#102a22]/[0.12] rounded-[8px] py-2 px-3.5 shadow-[0_4px_14px_rgba(0,0,0,0.08)] flex flex-col items-center justify-center text-center gap-1 min-w-[120px]"
                   >
-                    <span style={{ fontSize: '11px', color: '#688275', fontWeight: 600 }}>
+                    <span className="text-[11px] text-[#688275] font-semibold">
                       {label}
                     </span>
                     <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px',
-                        width: '100%',
-                      }}
+                      className="flex items-center justify-center gap-1.5 w-full"
                     >
                       <span
-                        style={{
-                          width: '7px',
-                          height: '7px',
-                          borderRadius: '50%',
-                          background: '#164e3f',
-                          display: 'inline-block',
-                          flexShrink: 0,
-                        }}
+                        className="size-[7px] rounded-full bg-[#164e3f] inline-block shrink-0"
                       />
-                      <span style={{ fontSize: '12px', color: '#243029', fontWeight: 500 }}>
+                      <span className="text-[12px] text-[#243029] font-medium">
                         Vencimentos:
                       </span>
                       <strong
-                        style={{
-                          fontSize: '13px',
-                          color: '#164e3f',
-                          fontWeight: 700,
-                          fontFamily: 'var(--app-font-mono, monospace)',
-                        }}
+                        className="text-[13px] text-[#164e3f] font-bold font-mono"
                       >
                         {item.value}
                       </strong>

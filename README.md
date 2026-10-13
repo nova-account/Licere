@@ -20,7 +20,7 @@ O sistema permite que equipes de gestão e conformidade monitorem obrigações e
 - **Linguagem**: [TypeScript](https://www.typescriptlang.org/)
 - **Banco de Dados**: [Prisma ORM](https://www.prisma.io/) + SQLite (`prisma/licere.db`)
 - **Gerenciamento de Estado**: [Zustand](https://zustand-demo.pmnd.rs/) (reatividade e sincronização em tempo real)
-- **Formulários e Validação**: [React Hook Form](https://react-hook-form.com/) integrado com schemas [Zod](https://zod.dev/)
+- **Formulários e Validação**: Validação segura e tipada com schemas [Zod](https://zod.dev/)
 - **Testes Automatizados**: [Jest](https://jestjs.io/) + React Testing Library
 - **Design & Ícones**: CSS moderno, Radix UI Primitives, Lucide Icons
 

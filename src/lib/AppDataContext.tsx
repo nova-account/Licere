@@ -1,25 +1,19 @@
 'use client';
 
 import React, { ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { Centro, Condicionante, DetailItem, Documento, Licenca } from '@/shared/types';
+import type { Centro, Condicionante, DetailItem, Documento, Licenca, Usuario } from '@/shared/types';
+import { isLicenca, isCondicionante, isDocumento } from '@/shared/types';
 import { getDocumentStatus } from '@/shared/utils';
 import { fetchInitialData, saveCentroDb, saveLicencaDb, saveCondicionanteDb, saveDocumentoDb, deleteCentroDb } from '@/actions/db-actions';
+import { getSessionUserId, startSession } from '@/lib/session';
 
 export interface WorkspaceInfo {
   nome: string;
   tipo: string;
 }
 
-export interface UserInfo {
-  nome: string;
-  email?: string;
-  cargo?: string;
-  empresa?: string;
-  telefone?: string;
-}
+export type UserInfo = Usuario;
 
 interface DeleteResult {
   success: boolean;
@@ -35,6 +29,8 @@ interface AppState {
   setCondicionantes: (updater: Condicionante[] | ((prev: Condicionante[]) => Condicionante[])) => void;
   documentos: Documento[];
   setDocumentos: (updater: Documento[] | ((prev: Documento[]) => Documento[])) => void;
+  usuarios: Usuario[];
+  setUsuarios: (updater: Usuario[] | ((prev: Usuario[]) => Usuario[])) => void;
   detail: DetailItem | null;
   setDetail: (updater: DetailItem | null | ((prev: DetailItem | null) => DetailItem | null)) => void;
   quickAdd: boolean;
@@ -48,192 +44,181 @@ interface AppState {
   syncProfile: () => void;
   saveDetail: (item: DetailItem) => Promise<void>;
   deleteCentro: (id: string) => DeleteResult;
-  createQuick: (kind: 'licenca' | 'condicionante' | 'documento', navigate: (path: string) => void) => string;
   loadDbData: () => Promise<void>;
+  isLoaded: boolean;
 }
 
 export const useAppStore = create<AppState>()(
-    (set, get) => ({
-      centros: [],
-      licencas: [],
-      condicionantes: [],
-      documentos: [],
-      detail: null,
-      quickAdd: false,
-      menuOpen: false,
-      workspace: {
-        nome: '',
-        tipo: 'Acesso Corporativo',
-      },
-      user: null,
+  (set, get) => ({
+    isLoaded: false,
+    centros: [],
+    licencas: [],
+    condicionantes: [],
+    documentos: [],
+    usuarios: [],
+    detail: null,
+    quickAdd: false,
+    menuOpen: false,
+    workspace: {
+      nome: '',
+      tipo: 'Acesso Corporativo',
+    },
+    user: null,
 
-      syncProfile: () => {
-        if (typeof window === 'undefined') return;
+    syncProfile: () => {
+      if (typeof window === 'undefined') return;
+      const { usuarios } = get();
+      if (!usuarios || usuarios.length === 0) return;
+
+      const sessionUserId = getSessionUserId();
+      let match = usuarios.find((u) => u.id === sessionUserId);
+      if (!match) {
         try {
-          const rawProfile = localStorage.getItem('licere-profile');
-          if (rawProfile) {
-            const p = JSON.parse(rawProfile);
-            set({
-              user: p,
-              workspace: {
-                nome: p.empresa || '',
-                tipo: 'Acesso Corporativo',
-              },
-            });
-            return;
-          }
-          const rawAuth = localStorage.getItem('licere_auth_user');
-          if (rawAuth) {
-            const a = JSON.parse(rawAuth);
-            set({
-              user: {
-                nome: a.nome || 'Usuário',
-                email: a.email,
-                cargo: a.role || 'Administrador(a)',
-                empresa: a.empresa || '',
-              },
-              workspace: {
-                nome: a.empresa || '',
-                tipo: 'Acesso Corporativo',
-              },
-            });
+          const raw = localStorage.getItem('licere_auth_user');
+          if (raw) {
+            const auth = JSON.parse(raw);
+            if (auth?.email) {
+              match = usuarios.find((u) => u.email.toLowerCase() === auth.email.trim().toLowerCase());
+            }
           }
         } catch {}
-      },
+      }
+      if (!match && usuarios.length > 0) {
+        match = usuarios[0];
+      }
+      if (match) {
+        startSession(match.id);
+        set({
+          user: match,
+          workspace: {
+            nome: match.empresa || '',
+            tipo: 'Acesso Corporativo',
+          },
+        });
+      }
+    },
 
-      setWorkspace: (updater) =>
-        set((state) => ({ workspace: typeof updater === 'function' ? updater(state.workspace) : updater })),
-      setUser: (updater) =>
-        set((state) => ({ user: typeof updater === 'function' ? updater(state.user) : updater })),
+    setWorkspace: (updater) =>
+      set((state) => ({ workspace: typeof updater === 'function' ? updater(state.workspace) : updater })),
+    setUser: (updater) =>
+      set((state) => ({ user: typeof updater === 'function' ? updater(state.user) : updater })),
 
-      loadDbData: async () => {
+    loadDbData: async () => {
+      try {
         const data = await fetchInitialData();
+        const dbUsers = (data.usuarios || []) as unknown as Usuario[];
         set({
           centros: data.centros as unknown as Centro[],
           licencas: data.licencas as unknown as Licenca[],
           condicionantes: data.condicionantes as unknown as Condicionante[],
-          documentos: data.documentos as unknown as Documento[]
+          documentos: data.documentos as unknown as Documento[],
+          usuarios: dbUsers,
+          isLoaded: true,
         });
-      },
 
-      setCentros: (updater) => set((state) => ({ centros: typeof updater === 'function' ? updater(state.centros) : updater })),
-      setLicencas: (updater) => set((state) => ({ licencas: typeof updater === 'function' ? updater(state.licencas) : updater })),
-      setCondicionantes: (updater) => set((state) => ({ condicionantes: typeof updater === 'function' ? updater(state.condicionantes) : updater })),
-      setDocumentos: (updater) => set((state) => ({ documentos: typeof updater === 'function' ? updater(state.documentos) : updater })),
-      setDetail: (updater) => set((state) => ({ detail: typeof updater === 'function' ? updater(state.detail) : updater })),
-      setQuickAdd: (updater) => set((state) => ({ quickAdd: typeof updater === 'function' ? updater(state.quickAdd) : updater })),
-      setMenuOpen: (updater) => set((state) => ({ menuOpen: typeof updater === 'function' ? updater(state.menuOpen) : updater })),
-
-      saveDetail: async (item) => {
-        if ('numero' in item) {
-          await saveLicencaDb(item as Licenca);
-          get().setLicencas((old) => {
-            const exists = old.find((x) => x.id === item.id);
-            if (exists) return old.map((x) => (x.id === item.id ? (item as Licenca) : x));
-            return [item as Licenca, ...old];
-          });
-        } else if ('recorrencia' in item) {
-          await saveCondicionanteDb(item as Condicionante);
-          get().setCondicionantes((old) => {
-            const exists = old.find((x) => x.id === item.id);
-            if (exists) return old.map((x) => (x.id === item.id ? (item as Condicionante) : x));
-            return [item as Condicionante, ...old];
-          });
-        } else if ('categoria' in item && 'nome' in item) {
-          await saveDocumentoDb(item as Documento);
-          get().setDocumentos((old) => {
-             const exists = old.find((x) => x.id === item.id);
-             if (exists) return old.map((x) => (x.id === item.id ? (item as Documento) : x));
-             return [item as Documento, ...old];
-          });
-        } else {
-          await saveCentroDb(item as Centro);
-          get().setCentros((old) => {
-             const exists = old.find((x) => x.id === item.id);
-             if (exists) return old.map((x) => (x.id === item.id ? (item as Centro) : x));
-             return [item as Centro, ...old];
-          });
+        if (typeof window !== 'undefined') {
+          const sessionUserId = getSessionUserId();
+          let match = dbUsers.find((u) => u.id === sessionUserId);
+          if (!match) {
+            try {
+              const raw = localStorage.getItem('licere_auth_user');
+              if (raw) {
+                const auth = JSON.parse(raw);
+                if (auth?.email) {
+                  match = dbUsers.find((u) => u.email.toLowerCase() === auth.email.trim().toLowerCase());
+                }
+              }
+            } catch {}
+          }
+          if (!match && dbUsers.length > 0) {
+            match = dbUsers[0];
+          }
+          if (match) {
+            startSession(match.id);
+            set({
+              user: match,
+              workspace: {
+                nome: match.empresa || '',
+                tipo: 'Acesso Corporativo',
+              },
+            });
+          }
         }
-      },
+      } catch (err) {
+        console.error('Erro ao carregar dados do banco:', err);
+        set({ isLoaded: true });
+      }
+    },
 
-      deleteCentro: (id) => {
-        const { centros, documentos, condicionantes, detail, setCentros, setDetail } = get();
-        const target = centros.find((c) => c.id === id);
-        if (!target) return { success: false, reason: 'Unidade não encontrada.' };
+    setCentros: (updater) => set((state) => ({ centros: typeof updater === 'function' ? updater(state.centros) : updater })),
+    setLicencas: (updater) => set((state) => ({ licencas: typeof updater === 'function' ? updater(state.licencas) : updater })),
+    setCondicionantes: (updater) => set((state) => ({ condicionantes: typeof updater === 'function' ? updater(state.condicionantes) : updater })),
+    setDocumentos: (updater) => set((state) => ({ documentos: typeof updater === 'function' ? updater(state.documentos) : updater })),
+    setUsuarios: (updater) => set((state) => ({ usuarios: typeof updater === 'function' ? updater(state.usuarios) : updater })),
+    setDetail: (updater) => set((state) => ({ detail: typeof updater === 'function' ? updater(state.detail) : updater })),
+    setQuickAdd: (updater) => set((state) => ({ quickAdd: typeof updater === 'function' ? updater(state.quickAdd) : updater })),
+    setMenuOpen: (updater) => set((state) => ({ menuOpen: typeof updater === 'function' ? updater(state.menuOpen) : updater })),
 
-        const pendenciasDocs = documentos.filter(
-          (d) => d.centroId === id && getDocumentStatus(d.validade) !== 'Válido'
-        );
-        const pendenciasTarefas = condicionantes.filter(
-          (c) => c.centroId === id && c.status !== 'Concluída'
-        );
+    saveDetail: async (item) => {
+      if (isLicenca(item)) {
+        await saveLicencaDb(item);
+        get().setLicencas((old) => {
+          const exists = old.find((x) => x.id === item.id);
+          if (exists) return old.map((x) => (x.id === item.id ? item : x));
+          return [item, ...old];
+        });
+      } else if (isCondicionante(item)) {
+        await saveCondicionanteDb(item);
+        get().setCondicionantes((old) => {
+          const exists = old.find((x) => x.id === item.id);
+          if (exists) return old.map((x) => (x.id === item.id ? item : x));
+          return [item, ...old];
+        });
+      } else if (isDocumento(item)) {
+        await saveDocumentoDb(item);
+        get().setDocumentos((old) => {
+          const exists = old.find((x) => x.id === item.id);
+          if (exists) return old.map((x) => (x.id === item.id ? item : x));
+          return [item, ...old];
+        });
+      } else {
+        await saveCentroDb(item);
+        get().setCentros((old) => {
+          const exists = old.find((x) => x.id === item.id);
+          if (exists) return old.map((x) => (x.id === item.id ? item : x));
+          return [item, ...old];
+        });
+      }
+    },
 
-        const total = pendenciasDocs.length + pendenciasTarefas.length;
-        if (total > 0) {
-          return {
-            success: false,
-            reason: `Não é possível excluir "${target.nome}". A unidade possui ${total} pendência(s) ativa(s) (${pendenciasDocs.length} documentos pendentes/expirados e ${pendenciasTarefas.length} tarefas não concluídas). Regularize-as antes de excluir.`,
-          };
-        }
+    deleteCentro: (id) => {
+      const { centros, documentos, condicionantes, detail, setCentros, setDetail } = get();
+      const target = centros.find((c) => c.id === id);
+      if (!target) return { success: false, reason: 'Unidade não encontrada.' };
 
-        deleteCentroDb(id).catch(console.error);
-        setCentros((prev) => prev.filter((c) => c.id !== id));
-        if (detail && 'id' in detail && detail.id === id) {
-          setDetail(null);
-        }
-        return { success: true };
-      },
+      const pendenciasDocs = documentos.filter(
+        (d) => d.centroId === id && getDocumentStatus(d.validade) !== 'Válido'
+      );
+      const pendenciasTarefas = condicionantes.filter(
+        (c) => c.centroId === id && c.status !== 'Concluída'
+      );
 
-      createQuick: (kind, navigate) => {
-        const { centros } = get();
-        const id = `${kind}-${Date.now()}`;
-        const activeCentro = centros.find((c) => c.status === 'Ativa') || centros[0];
+      const total = pendenciasDocs.length + pendenciasTarefas.length;
+      if (total > 0) {
+        return {
+          success: false,
+          reason: `Não é possível excluir "${target.nome}". A unidade possui ${total} pendência(s) ativa(s) (${pendenciasDocs.length} documentos pendentes/expirados e ${pendenciasTarefas.length} tarefas não concluídas). Regularize-as antes de excluir.`,
+        };
+      }
 
-        if (kind === 'licenca') {
-          const newItem: Licenca = {
-            id,
-            numero: 'NOVO REGISTRO',
-            tipo: 'Licença de Operação',
-            centroId: activeCentro?.id || '',
-            orgao: 'CETESB',
-            emissao: new Date().toISOString().split('T')[0],
-            vencimento: '2026-12-31',
-            status: 'Em análise',
-            criticidade: 'Média',
-            observacao: 'Registro criado localmente.',
-          };
-          get().saveDetail(newItem);
-          navigate('/licencas');
-        } else if (kind === 'condicionante') {
-          const { licencas } = get();
-          const newItem: Condicionante = {
-            id,
-            titulo: 'Nova obrigação ambiental',
-            licencaId: licencas[0]?.id || '',
-            centroId: activeCentro?.id || '',
-            responsavel: activeCentro?.responsavel || '',
-            prazo: '2025-05-15',
-            status: 'Em andamento',
-            recorrencia: 'Semestral',
-          };
-          get().saveDetail(newItem);
-          navigate('/tarefas');
-        } else {
-          const newItem: Documento = {
-            id,
-            nome: 'Novo documento — revisão pendente.pdf',
-            categoria: 'Relatórios',
-            centroId: activeCentro?.id || '',
-            atualizadoEm: new Date().toLocaleDateString('pt-BR'),
-            validade: '2026-12-31',
-            tamanho: '1.2 MB',
-          };
-          get().saveDetail(newItem);
-          navigate('/documentos');
-        }
-        return id;
-      },
-    })
+      deleteCentroDb(id).catch(console.error);
+      setCentros((prev) => prev.filter((c) => c.id !== id));
+      if (detail && 'id' in detail && detail.id === id) {
+        setDetail(null);
+      }
+      return { success: true };
+    },
+  })
 );
 
 export function AppDataProvider({ children }: { children: ReactNode }) {
@@ -260,13 +245,5 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 }
 
 export function useAppData() {
-  const store = useAppStore();
-  const router = useRouter();
-
-  return {
-    ...store,
-    createQuick: (kind: 'licenca' | 'condicionante' | 'documento') => {
-      return store.createQuick(kind, (path) => router.push(path));
-    },
-  };
+  return useAppStore();
 }

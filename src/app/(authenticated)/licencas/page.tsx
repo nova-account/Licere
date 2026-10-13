@@ -1,34 +1,22 @@
 'use client';
 import React, { useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import type { DetailItem, Licenca } from '@/shared/types';
 
-import { StatusPill } from '@/components/shared/status-pill';
+import { StatusPill, CriticalityPill } from '@/components/shared/status-pill';
 import { PageHeader } from '@/shared/ui';
 import { cn } from '@/lib/utils';
-import { FilterBar, ListHeader, EmptyState, useQuerySearch } from '@/components/layout/list-controls';
+import { FilterBar, ListHeader, EmptyState, ListSkeleton, useQuerySearch } from '@/components/layout/list-controls';
 import { NovaLicencaModal } from '@/components/modals/NovaLicencaModal';
-
-const centerName = (id: string, centrosList: any[]) => centrosList.find((c: any) => c.id === id)?.nome ?? id;
-
-const formatDate = (value: string) => {
-  if (!value) return '';
-  const [y, m, d] = value.split('-');
-  if (!d) return value;
-  return `${d}/${m}/${y}`;
-};
-
 import { useAppData } from '@/lib/AppDataContext';
+import { formatDate, centerName } from '@/shared/utils';
 
 export default function LicencasPage() {
-  const { licencas: items, setLicencas: setItems, setDetail: openDetail, centros } = useAppData();
+  const { licencas: items, setDetail: openDetail, centros, isLoaded, saveDetail } = useAppData();
 
-  const querySearch = useQuerySearch();
-  const [search, setSearch] = useState(querySearch);
+  const [search, setSearch] = useState('');
+  useQuerySearch(setSearch);
   const [filter, setFilter] = useState('Todos');
   const [sort, setSort] = useState<'vencimento' | 'centro'>('vencimento');
-  const router = useRouter();
 
   const filtered = useMemo(
     () =>
@@ -87,88 +75,101 @@ export default function LicencasPage() {
         />
         <ListHeader
           count={filtered.length}
-          label="licenças encontradas"
+          label={!isLoaded ? 'carregando...' : 'licenças encontradas'}
         />
-        <div className="table-scroll">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>
-                  Licença{' '}
-                  <button onClick={() => setSort('vencimento')}>
-                    <ChevronDown size={13} />
-                  </button>
-                </th>
-                <th>Unidade</th>
-                <th>Órgão</th>
-                <th>Vencimento</th>
-                <th>Criticidade</th>
-                <th>Status</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((item) => (
-                <tr
-                  key={item.id}
-                  onClick={() => openDetail(item)}
-                  data-testid={`row-licenca-${item.id}`}
-                >
-                  <td>
-                    <b>{item.tipo}</b>
-                    <small>{item.numero}</small>
-                  </td>
-                  <td>
-                    <span className="table-center">
-                      <span className="tiny-mark" />
-                      {centerName(item.centroId, centros)}
-                    </span>
-                  </td>
-                  <td>{item.orgao}</td>
-                  <td>
-                    <span
-                      className={cn(
-                        'date-cell',
-                        item.status === 'Vencida' && 'date-danger',
-                      )}
-                    >
-                      {formatDate(item.vencimento)}
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      className={`criticality criticality-${item.criticidade.toLowerCase()}`}
-                    >
-                      <i />
-                      {item.criticidade}
-                    </span>
-                  </td>
-                  <td>
-                    <StatusPill status={item.status} />
-                  </td>
-                  <td>
-                    <ChevronRight size={16} className="row-chevron" />
-                  </td>
+        {!isLoaded ? (
+          <ListSkeleton variant="table" rows={5} />
+        ) : items.length === 0 ? (
+          <EmptyState
+            title="Nenhuma licença cadastrada"
+            description="Cadastre sua primeira licença para iniciar o monitoramento de prazos e conformidades."
+            actionLabel="Nova licença"
+            onAction={add}
+          />
+        ) : (
+          <div className="table-scroll">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>
+                    Licença{' '}
+                    <button onClick={() => setSort('vencimento')}>
+                      <ChevronDown size={13} />
+                    </button>
+                  </th>
+                  <th>Unidade</th>
+                  <th>Órgão</th>
+                  <th>Vencimento</th>
+                  <th>Criticidade</th>
+                  <th>Status</th>
+                  <th />
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {filtered.length === 0 && (
-            <EmptyState
-              title="Nenhuma licença encontrada"
-              description="Ajuste a busca ou o filtro."
-              onClear={() => {
-                setSearch('');
-                setFilter('Todos');
-              }}
-            />
-          )}
-        </div>
+              </thead>
+              <tbody>
+                {filtered.map((item) => (
+                  <tr
+                    key={item.id}
+                    onClick={() => openDetail(item)}
+                    data-testid={`row-licenca-${item.id}`}
+                  >
+                    <td>
+                      <b>{item.tipo}</b>
+                      <small>{item.numero}</small>
+                    </td>
+                    <td>
+                      <span className="table-center">
+                        <span className="tiny-mark" />
+                        {centerName(item.centroId, centros)}
+                      </span>
+                    </td>
+                    <td>{item.orgao}</td>
+                    <td>
+                      <span
+                        className={cn(
+                          'date-cell',
+                          item.status === 'Vencida' && 'text-[#991520] font-bold',
+                        )}
+                      >
+                        {formatDate(item.vencimento)}
+                      </span>
+                    </td>
+                    <td>
+                      <CriticalityPill criticidade={item.criticidade} />
+                    </td>
+                    <td>
+                      <StatusPill status={item.status} />
+                    </td>
+                    <td>
+                      <ChevronRight size={16} className="row-chevron" />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {filtered.length === 0 && (
+              <EmptyState
+                title="Nenhuma licença encontrada"
+                description="Nenhum resultado corresponde aos critérios de pesquisa ou filtros aplicados."
+                clearLabel={
+                  search.trim() && filter !== 'Todos'
+                    ? 'Limpar busca e filtros'
+                    : search.trim()
+                      ? 'Limpar busca'
+                      : 'Limpar filtros'
+                }
+                onClear={() => {
+                  setSearch('');
+                  setFilter('Todos');
+                }}
+              />
+            )}
+          </div>
+        )}
       </div>
       <NovaLicencaModal
         open={addOpen}
         onClose={() => setAddOpen(false)}
-        onSave={(nova) => setItems((prev) => [nova, ...prev])}
+        onSave={(nova) => saveDetail(nova)}
       />
     </main>
   );

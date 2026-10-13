@@ -6,6 +6,7 @@
   display: flex;
   justify-content: flex-end;
   background: rgba(10, 32, 25, 0.32);
+  overscroll-behavior: contain;
 }
 
 .detail-drawer {
@@ -34,6 +35,11 @@
     700 20px "Manrope",
     sans-serif;
   letter-spacing: -0.05em;
+  word-break: break-word;
+}
+
+.drawer-head .icon-btn {
+  flex-shrink: 0;
 }
 
 .drawer-head span {
@@ -46,6 +52,7 @@
 .drawer-content {
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 22px 26px;
 }
 
@@ -202,10 +209,29 @@
 
 /* ── Responsive ── */
 @media (max-width: 760px) {
+  .drawer-backdrop {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 32px 16px;
+    box-sizing: border-box;
+  }
+
+  .detail-drawer {
+    margin: auto;
+    width: min(480px, calc(100% - 16px));
+    height: auto;
+    max-height: calc(100dvh - 64px);
+    border: 1px solid rgba(16, 42, 34, 0.08);
+    border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(10, 32, 25, 0.16);
+    overflow: hidden;
+  }
+
   .drawer-head,
   .drawer-content,
   .drawer-foot {
-    padding-right: 18px;
-    padding-left: 18px;
+    padding-right: 20px;
+    padding-left: 20px;
   }
 }

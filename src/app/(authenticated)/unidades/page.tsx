@@ -1,30 +1,23 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import type { Centro } from '@/shared/types';
 import { StatusPill } from '@/components/shared/status-pill';
-import { PageHeader, initials } from '@/shared/ui';
-import { FilterBar, ListHeader, EmptyState, useQuerySearch } from '@/components/layout/list-controls';
+import { PageHeader, Avatar } from '@/shared/ui';
+import { FilterBar, ListHeader, EmptyState, ListSkeleton, useQuerySearch } from '@/components/layout/list-controls';
 import { NovaUnidadeModal } from '@/components/modals/NovaUnidadeModal';
 import { useAppData } from '@/lib/AppDataContext';
 
 const ITEMS_PER_PAGE = 5;
 
 export default function UnidadesPage() {
-  const { centros, setCentros, setDetail: openDetail } = useAppData();
+  const { centros, isLoaded, setDetail: openDetail, saveDetail } = useAppData();
 
-  const querySearch = useQuerySearch();
-  const [search, setSearch] = useState(querySearch);
+  const [search, setSearch] = useState('');
+  useQuerySearch(setSearch);
   const [filter, setFilter] = useState('Todos');
   const [addOpen, setAddOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 200);
-    return () => clearTimeout(timer);
-  }, []);
 
   const filtered = centros.filter(
     (center) =>
@@ -75,62 +68,66 @@ export default function UnidadesPage() {
         />
         <ListHeader
           count={filtered.length}
-          label="unidades cadastradas"
+          label={!isLoaded ? 'carregando...' : 'unidades cadastradas'}
         />
 
-        {isLoading ? (
-          <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {[1, 2, 3, 4].map((n) => (
-              <div
-                key={n}
-                style={{
-                  height: '52px',
-                  borderRadius: '8px',
-                  background: 'linear-gradient(90deg, #f0f3f1 25%, #e6ebe8 50%, #f0f3f1 75%)',
-                  backgroundSize: '200% 100%',
-                  animation: 'pulse 1.5s infinite ease-in-out',
-                }}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="unit-list">
-            {paginated.map((center) => (
-              <button
-                className="unit-row"
-                onClick={() => openDetail(center)}
-                key={center.id}
-                data-testid={`row-unidade-${center.id}`}
-              >
-                <span className="unit-symbol">{initials(center.nome)}</span>
-                <span className="unit-name">
-                  <b>{center.nome}</b>
-                  <small>
-                    {center.cidade} — {center.estado}
-                  </small>
-                </span>
-                <span className="unit-owner">{center.responsavel}</span>
-                <StatusPill status={center.status} />
-                <ChevronRight size={16} />
-              </button>
-            ))}
-          </div>
-        )}
-
-        {!isLoading && filtered.length === 0 && (
+        {!isLoaded ? (
+          <ListSkeleton variant="unit" rows={5} />
+        ) : centros.length === 0 ? (
+          <EmptyState
+            title="Nenhuma unidade cadastrada"
+            description="Comece cadastrando sua primeira unidade operacional no sistema."
+            actionLabel="Nova unidade"
+            onAction={() => setAddOpen(true)}
+          />
+        ) : filtered.length === 0 ? (
           <EmptyState
             title="Nenhuma unidade encontrada"
-            description="Ajuste a busca ou os filtros para encontrar a unidade desejada."
+            description="Nenhum resultado corresponde aos critérios de pesquisa ou filtros aplicados."
+            clearLabel={
+              search.trim() && filter !== 'Todos'
+                ? 'Limpar busca e filtros'
+                : search.trim()
+                  ? 'Limpar busca'
+                  : 'Limpar filtros'
+            }
             onClear={() => {
               setSearch('');
               setFilter('Todos');
               setCurrentPage(1);
             }}
           />
+        ) : (
+          <div className="w-full">
+            {paginated.map((center) => (
+              <button
+                className="grid [grid-template-columns:38px_minmax(180px,1fr)_minmax(150px,0.65fr)_auto_16px] max-[760px]:[grid-template-columns:36px_1fr_auto_16px] items-center w-full gap-3.5 max-[760px]:gap-2 px-5 py-3.5 border-t border-[#e4ebed] first:border-t-0 text-inherit bg-transparent text-left hover:bg-[rgba(14,80,55,0.025)] cursor-pointer transition-colors"
+                onClick={() => openDetail(center)}
+                key={center.id}
+                data-testid={`row-unidade-${center.id}`}
+              >
+                <Avatar name={center.nome} size="md" shape="rounded" />
+                <span className="flex flex-col gap-1 min-w-0">
+                  <b className="truncate text-[#234a3a] text-xs font-bold">
+                    {center.nome}
+                  </b>
+                  <small className="text-[#819397] text-[10px]">
+                    {center.cidade} — {center.estado}
+                  </small>
+                </span>
+                <span className="flex items-center gap-1.5 text-[#6c796e] text-[10px] min-w-0 truncate max-[760px]:hidden">
+                  <Avatar name={center.responsavel} size="xs" shape="circle" />
+                  <span className="truncate">{center.responsavel}</span>
+                </span>
+                <StatusPill status={center.status} />
+                <ChevronRight size={16} className="text-[#9eafb1] shrink-0" />
+              </button>
+            ))}
+          </div>
         )}
 
         {/* Paginação */}
-        {!isLoading && filtered.length > 0 && (
+        {isLoaded && filtered.length > 0 && (
           <div className="pagination-bar">
             <span className="pagination-info">
               Exibindo {(safePage - 1) * ITEMS_PER_PAGE + 1} a{' '}
@@ -167,7 +164,7 @@ export default function UnidadesPage() {
       <NovaUnidadeModal
         open={addOpen}
         onClose={() => setAddOpen(false)}
-        onSave={(nova) => setCentros((prev) => [nova, ...prev])}
+        onSave={(nova) => saveDetail(nova)}
       />
     </main>
   );

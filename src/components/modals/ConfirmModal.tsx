@@ -36,50 +36,38 @@ export function ConfirmModal({
 
   return (
     <div
-      className="modal-backdrop animate-fade"
+      className="modal-backdrop animate-fade z-[1000]"
       onClick={(e) => e.target === e.currentTarget && onCancel()}
-      style={{ zIndex: 1000 }}
     >
       <div
-        className="quick-modal animate-rise"
-        style={{ maxWidth: '420px', width: '100%' }}
+        className="quick-modal animate-rise max-w-[420px] w-full"
       >
-        <div className="drawer-head" style={{ borderBottom: '1px solid #edf1ee' }}>
+        <div className="drawer-head border-b border-[#edf1ee]">
           <div>
-            <h2 style={{ fontSize: '16px', margin: 0 }}>{title}</h2>
+            <h2 className="text-[16px] m-0">{title}</h2>
           </div>
           <button className="icon-btn" onClick={onCancel} aria-label="Cancelar">
             <X size={18} />
           </button>
         </div>
 
-        <div className="drawer-content" style={{ padding: '24px', fontSize: '14px', color: '#445b50', lineHeight: 1.5 }}>
+        <div className="drawer-content p-6 text-[14px] text-[#445b50] leading-[1.5]">
           {description}
         </div>
 
         <div
-          className="drawer-foot"
-          style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '12px',
-            padding: '14px 24px',
-            borderTop: '1px solid #edf1ee',
-            background: '#fbfcfb',
-          }}
+          className="drawer-foot flex justify-end gap-3 py-3.5 px-6 border-t border-[#edf1ee] bg-[#fbfcfb]"
         >
           <button
             type="button"
-            className="secondary-btn"
-            style={{ height: '36px', padding: '0 16px' }}
+            className="secondary-btn h-[36px] px-4"
             onClick={onCancel}
           >
             Cancelar
           </button>
           <button
             type="button"
-            className="primary-btn"
-            style={{ height: '36px', padding: '0 16px' }}
+            className="primary-btn h-[36px] px-4"
             onClick={onConfirm}
           >
             Confirmar

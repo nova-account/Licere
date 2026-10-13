@@ -1,38 +1,38 @@
 'use client';
 
-import { useState } from 'react';
-import { ArrowRight, Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowRight, Eye, EyeOff, AlertCircle, Loader2, Check } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { Mark } from '@/shared/ui';
-import { ForgotPasswordModal } from '@/components/modals/ForgotPasswordModal';
 import { cn } from '@/lib/utils';
-
-const loginInputClass =
-  'h-[47px] w-full box-border rounded-[11px] border border-input bg-muted px-[14px] text-[13px] text-foreground outline-none transition-[border-color,background,box-shadow] duration-150 placeholder:text-muted-foreground focus:border-primary focus:bg-card focus:ring-4 focus:ring-primary/10';
-
-const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'O e-mail corporativo é obrigatório.')
-    .email('Informe um e-mail corporativo válido (ex: nome@empresa.com.br).'),
-  password: z
-    .string()
-    .min(1, 'A senha de acesso é obrigatória.')
-    .min(6, 'A senha deve conter no mínimo 6 caracteres.'),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
+import { fetchUsuariosDb, authenticateUsuario } from '@/actions/db-actions';
+import { startSession } from '@/lib/session';
+import { loginSchema } from '@/shared/schemas';
+import type { Usuario, LoginFormData } from '@/shared/types';
+import { ForgotPasswordModal } from '@/components/modals/ForgotPasswordModal';
 
 export default function Login() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
   const [forgotOpen, setForgotOpen] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [connectingId, setConnectingId] = useState<string | null>(null);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [showDemoUsers, setShowDemoUsers] = useState(false);
+
+  useEffect(() => {
+    fetchUsuariosDb()
+      .then((list) => {
+        if (list && list.length > 0) {
+          setUsuarios(list);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   const {
     register,
@@ -47,139 +47,108 @@ export default function Login() {
     },
   });
 
+  const handleSelectUser = (u: Usuario) => {
+    setValue('email', u.email, { shouldValidate: true });
+    setValue('password', 'licere123', { shouldValidate: true });
+
+    setConnectingId(u.id);
+    setErrorMessage(null);
+
+    startSession(u.id);
+    localStorage.setItem(
+      'licere_auth_user',
+      JSON.stringify({
+        id: u.id,
+        email: u.email,
+        role: u.tipoAcesso,
+        cargo: u.cargo,
+        tipoAcesso: u.tipoAcesso,
+        nome: u.nome,
+        empresa: u.empresa,
+        telefone: u.telefone || '',
+        authenticatedAt: new Date().toISOString(),
+      }),
+    );
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('licere:profile_updated'));
+    }
+
+    setTimeout(() => {
+      router.push('/dashboard');
+    }, 350);
+  };
+
   const onSubmit = async (data: LoginFormData) => {
-    setStatusMessage(null);
+    setErrorMessage(null);
 
-    // Simulação de validação de credenciais
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      
-      let userName = 'Marina Azevedo';
-      let userEmpresa = 'Operações Brasil';
-      try {
-        const existingProfile = localStorage.getItem('licere-profile');
-        if (existingProfile) {
-          const parsed = JSON.parse(existingProfile);
-          if (parsed.nome) userName = parsed.nome;
-          if (parsed.empresa) userEmpresa = parsed.empresa;
-        } else {
-          const [prefix, domain] = (data.email || '').split('@');
-          if (prefix && prefix.toLowerCase() !== 'marina.azevedo') {
-            userName = prefix
-              .split(/[._-]/)
-              .filter(Boolean)
-              .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-              .join(' ');
-          }
-          if (domain && !domain.includes('empresa.com.br') && !domain.includes('operacoesbrasil')) {
-            const domainName = domain.split('.')[0];
-            if (!['gmail', 'hotmail', 'outlook', 'yahoo'].includes(domainName.toLowerCase())) {
-              userEmpresa = domainName.charAt(0).toUpperCase() + domainName.slice(1);
-            } else {
-              userEmpresa = 'Organização';
-            }
-          }
-        }
-      } catch {}
+      const authUser = await authenticateUsuario(data.email, data.password);
+      if (authUser) {
+        handleSelectUser(authUser);
+        return;
+      }
 
-      // Salva a sessão de autenticação exigida pelo edital
-      localStorage.setItem(
-        'licere_auth_user',
-        JSON.stringify({
-          email: data.email,
-          role: 'Administrador',
-          nome: userName,
-          empresa: userEmpresa,
-          authenticatedAt: new Date().toISOString(),
-        }),
-      );
-
-      setStatusMessage({
-        type: 'success',
-        text: 'Acesso autenticado com sucesso! Redirecionando para o painel...',
-      });
-
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 700);
+      setErrorMessage('Credenciais inválidas. Verifique seu e-mail e senha corporativos.');
     } catch {
-      setStatusMessage({
-        type: 'error',
-        text: 'Falha ao autenticar. Verifique seus dados e tente novamente.',
-      });
+      setErrorMessage('Falha ao autenticar. Verifique sua conexão e tente novamente.');
     }
   };
 
   const handleDemoAccess = () => {
-    setValue('email', 'marina.azevedo@empresa.com.br', { shouldValidate: true });
-    setValue('password', 'licere2026', { shouldValidate: true });
-    localStorage.setItem(
-      'licere_auth_user',
-      JSON.stringify({
-        email: 'marina.azevedo@empresa.com.br',
-        role: 'Administrador',
-        nome: 'Marina Azevedo',
-        empresa: 'Operações Brasil',
-        authenticatedAt: new Date().toISOString(),
-      }),
-    );
-    setStatusMessage({
-      type: 'success',
-      text: 'Acesso rápido demonstrativo autorizado. Entrando...',
-    });
-    setTimeout(() => {
-      router.push('/dashboard');
-    }, 500);
+    setShowDemoUsers((prev) => !prev);
   };
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-background px-[clamp(18px,4vw,64px)] pt-[26px] pb-[20px] text-foreground max-[760px]:px-[15px] max-[760px]:pt-[20px] max-[760px]:pb-[17px]">
-      <header className="mx-auto flex w-[min(1220px,100%)] items-center justify-between gap-[20px]">
-        <Link href="/" className="inline-flex items-center gap-[10px] text-foreground no-underline" data-testid="link-login-brand">
-          <Mark className="size-9" />
-          <span className="font-display text-[21px] font-extrabold tracking-[-0.06em] text-foreground">licere</span>
+    <div className="h-[100dvh] overflow-y-auto flex flex-col pt-[26px] pb-5 px-[clamp(18px,4vw,64px)] max-[760px]:pt-5 max-[760px]:pb-[17px] max-[760px]:px-[15px] text-[#162922] bg-[#f8f9fa]">
+      <header className="w-[min(1220px,100%)] mx-auto flex items-center justify-between gap-5">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2.5 no-underline text-[#173c2d]"
+          data-testid="link-login-brand"
+        >
+          <Mark className="size-9 text-[#1b6848] block" />
+          <span className="font-['Manrope',sans-serif] font-extrabold text-[21px] tracking-[-0.06em] text-[#173c2d]">licere</span>
         </Link>
       </header>
 
-      <main className="grid flex-1 place-items-center py-[16px] max-[760px]:py-[30px]">
+      <main className="grid flex-1 place-items-center py-4 max-[760px]:py-[30px]">
         <section
-          className="grid w-[min(1040px,100%)] grid-cols-[1.05fr_0.95fr] overflow-hidden rounded-[24px] border border-border bg-card shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_16px_-3px_rgba(15,23,42,0.04)] max-[1100px]:grid-cols-2 max-[760px]:block max-[760px]:rounded-[21px]"
+          className="w-[min(1040px,100%)] grid grid-cols-[1.05fr_0.95fr] max-[1100px]:grid-cols-2 max-[760px]:block overflow-hidden border border-[#102a22]/[0.08] rounded-[24px] max-[760px]:rounded-[21px] bg-white shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_16px_-3px_rgba(15,23,42,0.04)]"
           aria-label="Acesso à Licere"
         >
-          <div className="relative isolate min-h-[510px] overflow-hidden bg-sidebar p-[36px] text-sidebar-foreground max-[1100px]:min-h-[550px] max-[1100px]:p-[32px] max-[760px]:min-h-[275px] max-[760px]:p-[25px]">
-            <div className="absolute inset-0 [background-image:linear-gradient(currentColor_1px,transparent_1px),linear-gradient(90deg,currentColor_1px,transparent_1px)] [background-size:34px_34px] text-sidebar-foreground/[0.04] [mask-image:linear-gradient(to_bottom,black,transparent_78%)]" />
-            <div className="absolute bottom-[86px] left-[42px] z-[2] flex flex-col gap-[15px] max-[1100px]:bottom-[78px] max-[1100px]:left-[32px] max-[760px]:bottom-[51px] max-[760px]:left-[25px] max-[760px]:gap-[7px]">
-              <b className="font-display text-[clamp(28px,4vw,46px)] leading-[0.98] font-bold tracking-[-0.075em] text-sidebar-foreground max-[760px]:text-[25px]">Conformidade que<br />se deixa ler.</b>
+          <div className="min-h-[510px] max-[1100px]:min-h-[550px] max-[760px]:min-h-[275px] relative isolate overflow-hidden p-9 max-[1100px]:p-8 max-[760px]:p-[25px] text-[#f2faf2] bg-[#0b291e]">
+            <div className="visual-grid" />
+            <div className="absolute z-[2] left-[42px] max-[1100px]:left-8 max-[760px]:left-[25px] bottom-[86px] max-[1100px]:bottom-[78px] max-[760px]:bottom-[51px] flex flex-col gap-[15px] max-[760px]:gap-[7px]">
+              <b className="text-[#eff6f4] font-['Manrope',sans-serif] font-bold text-[clamp(28px,4vw,46px)] max-[760px]:text-[25px] leading-[0.98] tracking-[-0.035em]">
+                Conformidade que<br />se deixa ler.
+              </b>
             </div>
           </div>
 
-          <section className="flex flex-col justify-center bg-card px-[clamp(28px,5vw,70px)] py-[58px] max-[760px]:p-[32px_25px_28px]">
-            <div className="mb-[30px] max-[760px]:mb-[24px]">
-              <p className="mt-0 mb-[8px] font-mono text-[10px] tracking-[0.13em] text-muted-foreground uppercase">Acesso corporativo</p>
-              <h1 className="m-0 font-display text-[clamp(28px,3vw,37px)] leading-[1.05] font-extrabold tracking-[-0.075em] text-foreground max-[760px]:text-[29px]">Entrar na Licere</h1>
-              <p className="mt-[12px] mb-0 text-[13px] leading-[1.5] text-muted-foreground">Acesse o painel integrado das suas unidades operacionais.</p>
+          <section className="flex flex-col justify-center py-[58px] px-[clamp(28px,5vw,70px)] max-[760px]:pt-8 max-[760px]:pb-7 max-[760px]:px-[25px] bg-white">
+            <div className="mb-[30px] max-[760px]:mb-6">
+              <p className="m-0 mb-2 text-[#7d9296] font-mono text-[10px] tracking-[0.13em] uppercase">Acesso corporativo</p>
+              <h1 className="m-0 text-[#162f26] font-['Manrope',sans-serif] font-extrabold text-[clamp(28px,3vw,37px)] max-[760px]:text-[29px] leading-[1.05] tracking-[-0.035em]">
+                Entrar na Licere
+              </h1>
+              <p className="m-0 mt-3 text-[#789095] text-[13px] leading-[1.5]">
+                Acesse o painel integrado das suas unidades operacionais.
+              </p>
             </div>
 
-            {statusMessage && (
+            {errorMessage && (
               <div
-                className={cn(
-                  'mt-[12px] mb-[16px] flex items-center gap-[10px] rounded-[8px] border p-[12px_14px] text-[13px]',
-                  statusMessage.type === 'success'
-                    ? 'border-primary/30 bg-primary/5 text-primary'
-                    : 'border-destructive/30 bg-destructive/5 text-destructive',
-                )}
+                className="mt-3 mb-4 py-3 px-3.5 rounded-lg flex items-center gap-2.5 text-[13px] bg-[#fdeded] border border-[#f5c2c7] text-[#b02a37]"
+                role="alert"
               >
-                {statusMessage.type === 'success' ? (
-                  <CheckCircle2 size={18} className="shrink-0" />
-                ) : (
-                  <AlertCircle size={18} className="shrink-0" />
-                )}
-                <span>{statusMessage.text}</span>
+                <AlertCircle size={18} className="shrink-0" />
+                <span>{errorMessage}</span>
               </div>
             )}
 
             <form className="flex flex-col gap-[19px]" onSubmit={handleSubmit(onSubmit)} noValidate>
-              <label className="flex flex-col gap-[8px] text-[11px] font-bold tracking-[0.02em] text-foreground">
+              <label className="flex flex-col gap-2 text-[#365b4c] text-[11px] font-bold tracking-[0.02em]">
                 <span>E-mail corporativo</span>
                 <input
                   type="email"
@@ -187,30 +156,30 @@ export default function Login() {
                   placeholder="nome@empresa.com.br"
                   {...register('email')}
                   className={cn(
-                    loginInputClass,
-                    errors.email && 'border-destructive bg-destructive/5',
+                    'w-full h-[47px] box-border px-3.5 border border-[#d5e2e4] rounded-[11px] text-[#244d3b] bg-[#f4f8f8] text-[13px] placeholder:text-[#9aa9ac] transition-[border-color,background-color,box-shadow] duration-150 !outline-none focus:!outline-none focus-visible:!outline-none focus:border-[#61937d] focus:bg-[#fbfcfc] focus:shadow-[0_0_0_4px_rgba(73,142,96,0.11)]',
+                    errors.email && '!border-[#b02a37] !bg-[#fffbfb] focus:!border-[#b02a37] focus:!shadow-[0_0_0_4px_rgba(176,42,55,0.12)]',
                   )}
                   data-testid="input-login-email"
                 />
                 {errors.email && (
-                  <span className="mt-[4px] flex items-center gap-[4px] text-[11px] text-destructive">
-                    <AlertCircle size={12} /> {errors.email.message}
+                  <span className="text-[#b02a37] text-[11px] mt-1 flex items-center gap-1">
+                    <AlertCircle size={12} className="shrink-0" /> {errors.email.message}
                   </span>
                 )}
               </label>
 
-              <div className="flex flex-col gap-[8px] text-[11px] font-bold tracking-[0.02em] text-foreground">
-                <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-2 text-[#365b4c] text-[11px] font-bold tracking-[0.02em]">
+                <div className="flex justify-between items-center">
                   <label htmlFor="password" className="block">Senha</label>
                   <button
                     type="button"
-                    className="cursor-pointer border-none bg-transparent p-0 text-[11px] font-medium text-primary underline decoration-transparent transition-all hover:decoration-primary"
+                    className="bg-transparent border-none text-[11px] text-primary font-medium cursor-pointer p-0 underline decoration-transparent hover:decoration-primary transition-all duration-200"
                     onClick={() => setForgotOpen(true)}
                   >
                     Esqueceu a senha?
                   </button>
                 </div>
-                <span className="relative">
+                <div className="relative block w-full">
                   <input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
@@ -218,91 +187,162 @@ export default function Login() {
                     placeholder="Digite sua senha"
                     {...register('password')}
                     className={cn(
-                      loginInputClass,
-                      'pr-[46px]',
-                      errors.password && 'border-destructive bg-destructive/5',
+                      'w-full h-[47px] box-border pl-3.5 pr-[42px] border border-[#d5e2e4] rounded-[11px] text-[#244d3b] bg-[#f4f8f8] text-[13px] placeholder:text-[#9aa9ac] transition-[border-color,background-color,box-shadow] duration-150 !outline-none focus:!outline-none focus-visible:!outline-none focus:border-[#61937d] focus:bg-[#fbfcfc] focus:shadow-[0_0_0_4px_rgba(73,142,96,0.11)]',
+                      errors.password && '!border-[#b02a37] !bg-[#fffbfb] focus:!border-[#b02a37] focus:!shadow-[0_0_0_4px_rgba(176,42,55,0.12)]',
                     )}
                     data-testid="input-login-password"
                   />
                   <button
                     type="button"
-                    className="absolute top-1/2 right-[11px] grid size-7 -translate-y-1/2 place-items-center border-0 bg-transparent p-0 text-muted-foreground hover:text-primary"
+                    className="absolute inset-y-0 right-3 my-auto flex items-center justify-center size-6 p-0 border-none bg-transparent text-[#71887c] hover:text-[#1a563d] focus-visible:outline-none focus-visible:text-[#1a563d] cursor-pointer transition-colors duration-150 z-10 outline-none shadow-none"
                     onClick={() => setShowPassword((current) => !current)}
-                    aria-label={showPassword ? 'ocultar senha' : 'mostrar senha'}
+                    aria-label={showPassword ? 'Ocultar senha' : 'Exibir senha'}
+                    title={showPassword ? 'Ocultar senha' : 'Exibir senha'}
                     data-testid="button-toggle-password"
                   >
-                    {showPassword ? <Eye size={17} /> : <EyeOff size={17} />}
+                    {showPassword ? <Eye size={17} strokeWidth={1.75} className="shrink-0 pointer-events-none block" /> : <EyeOff size={17} strokeWidth={1.75} className="shrink-0 pointer-events-none block" />}
                   </button>
-                </span>
+                </div>
                 {errors.password && (
-                  <span className="mt-[4px] flex items-center gap-[4px] text-[11px] text-destructive">
-                    <AlertCircle size={12} /> {errors.password.message}
+                  <span className="text-[#b02a37] text-[11px] mt-1 flex items-center gap-1">
+                    <AlertCircle size={12} className="shrink-0" /> {errors.password.message}
                   </span>
                 )}
               </div>
 
-              <label className="flex cursor-pointer items-center gap-[9px] text-[11px] text-muted-foreground">
+              <label className="flex items-center gap-[9px] text-[#71868b] text-[11px] cursor-pointer">
                 <input
                   type="checkbox"
-                  className="m-0 size-[15px] accent-primary"
                   autoComplete="on"
                   checked={remember}
                   onChange={(e) => setRemember(e.target.checked)}
+                  className="size-[15px] m-0 accent-[#1b6848] !outline-none focus:!outline-none focus-visible:!outline-none"
                   data-testid="input-login-remember"
                 />
                 <span>Lembrar este acesso</span>
               </label>
 
               <button
-                className={cn(
-                  'mt-[3px] flex h-[47px] items-center justify-center gap-[8px] rounded-[11px] border border-primary bg-primary text-[13px] font-bold text-primary-foreground shadow-[0_8px_16px_rgba(30,93,65,0.15)] transition-[background,transform] duration-150 hover:-translate-y-px hover:bg-primary/90',
-                  isSubmitting && 'opacity-70',
-                )}
+                className="flex items-center justify-center gap-2 h-[47px] mt-[3px] border border-[#176044] rounded-[11px] text-[#f4faf4] bg-[#176044] shadow-[0_8px_16px_rgba(30,93,65,0.15)] !text-[13px] !font-bold transition-[background-color,transform] duration-150 hover:bg-[#104c35] hover:-translate-y-[1px] disabled:opacity-75 disabled:cursor-wait disabled:transform-none cursor-pointer"
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !!connectingId}
                 data-testid="button-login-submit"
               >
-                {isSubmitting ? 'Validando...' : 'Entrar na plataforma'} <ArrowRight size={17} />
+                {isSubmitting || !!connectingId ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <>
+                    <span className="font-bold text-[13px]">Entrar na plataforma</span>
+                    <ArrowRight size={17} />
+                  </>
+                )}
               </button>
             </form>
 
-            <div className="mt-[25px] mb-[16px] flex items-center gap-[12px] font-mono text-[9px] tracking-[0.08em] text-muted-foreground uppercase before:h-px before:flex-1 before:bg-border after:h-px after:flex-1 after:bg-border">
+            <div className="flex items-center gap-3 mt-[25px] mb-4 text-[#98a8ab] font-mono text-[9px] tracking-[0.08em] uppercase before:content-[''] before:h-px before:flex-1 before:bg-[#e0e8e9] after:content-[''] after:h-px after:flex-1 after:bg-[#e0e8e9]">
               <span>ou</span>
             </div>
 
             <button
               type="button"
-              className="flex h-[45px] items-center justify-center gap-[11px] rounded-[11px] border border-input bg-card text-[12px] font-bold text-foreground transition-[background,border-color] duration-150 hover:border-primary/40 hover:bg-muted"
+              className="flex items-center justify-center gap-[11px] h-[45px] border border-[#d5e2e4] rounded-[11px] text-[#3f6257] bg-[#fbfcfc] !text-[12px] !font-bold transition-[background-color,border-color] duration-150 hover:border-[#9dbbc2] hover:bg-[#edf3f4] cursor-pointer"
               onClick={handleDemoAccess}
               data-testid="button-login-sso"
             >
-              <span className="grid w-[16px] grid-cols-2 gap-[2px] [&>i]:block [&>i]:size-[7px] [&>i:nth-child(1)]:bg-chart-3 [&>i:nth-child(2)]:bg-chart-5 [&>i:nth-child(3)]:bg-chart-1 [&>i:nth-child(4)]:bg-muted-foreground">
-                <i /><i /><i /><i />
+              <span className="grid grid-cols-[repeat(2,7px)] gap-[2px] w-4">
+                <i className="size-[7px] block bg-[#658ea5]" />
+                <i className="size-[7px] block bg-[#7ca38e]" />
+                <i className="size-[7px] block bg-[#8b8fb3]" />
+                <i className="size-[7px] block bg-[#9cb5bd]" />
               </span>
-              Entrar com SSO corporativo
+              <span className="font-bold text-[12px]">Entrar com SSO corporativo</span>
             </button>
 
-            <div className="mt-[27px] flex justify-between gap-[12px] text-[10px] text-muted-foreground">
+            <div className="flex justify-between gap-3 mt-[27px] text-[#93a59a] text-[10px]">
               <button
                 type="button"
-                className="border-0 bg-transparent p-0 text-[10px] font-bold text-primary"
                 onClick={handleDemoAccess}
                 data-testid="button-login-explore"
+                className="p-0 border-0 bg-transparent !text-[10px] text-[#236848] !font-bold cursor-pointer inline-flex items-center gap-[2.5px] hover:underline"
               >
-                Explorar workspace de demonstração →
+                <span className="font-bold text-[10px] text-[#236848]">Explorar workspace de demonstração</span>
+                <ArrowRight
+                  size={10}
+                  strokeWidth={2.2}
+                  className={cn(
+                    'transition-transform duration-200 ease-out text-[#236848]',
+                    showDemoUsers ? 'rotate-90' : 'rotate-0',
+                  )}
+                />
               </button>
             </div>
+
+            {showDemoUsers && usuarios.length > 0 && (
+              <div className="mt-[14px] mx-auto w-full max-w-[408px] py-[11px] px-[10px] rounded-[10px] bg-[#f6faf7] border border-[#dce8e1] box-border">
+                <p className="m-0 mb-[9px] text-[11px] text-[#4a6b5d] text-center font-semibold">
+                  Selecione o responsável para testar:
+                </p>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {usuarios.map((u) => {
+                    const isSelected = connectingId === u.id;
+                    return (
+                      <button
+                        key={u.id}
+                        type="button"
+                        disabled={!!connectingId}
+                        onClick={() => handleSelectUser(u)}
+                        className={cn(
+                          'w-full h-[26px] box-border inline-flex items-center justify-start gap-1 px-2 rounded-lg text-[10px] whitespace-nowrap overflow-hidden transition-colors duration-150',
+                          connectingId ? 'cursor-wait' : 'cursor-pointer',
+                          connectingId && !isSelected && 'opacity-50',
+                          isSelected
+                            ? 'border border-[#1b6848] bg-[#dff0e6] text-[#143f2f]'
+                            : cn(
+                              'border border-[#cbdcd2] bg-white text-[#1e4838]',
+                              !connectingId && 'hover:bg-[#e6f1eb] hover:border-[#1b6848]',
+                            ),
+                        )}
+                      >
+                        {isSelected ? (
+                          <Check size={11} strokeWidth={2.5} className="text-[#1b6848] shrink-0" />
+                        ) : (
+                          <span className="size-[5px] rounded-full bg-[#1b6848] shrink-0" />
+                        )}
+                        <b className="truncate font-semibold text-[10px]">{u.nome}</b>
+                        {u.tipoAcesso && (
+                          <span className="opacity-75 text-[9px] font-normal shrink-0">
+                            • {u.tipoAcesso}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </section>
         </section>
       </main>
 
-      <footer className="mx-auto box-border flex w-full max-w-[1200px] items-center justify-between border-t border-border p-[24px_20px] text-[12px] text-muted-foreground">
+      <footer className="flex items-center justify-between max-w-[1200px] w-full mx-auto py-6 px-5 text-[12px] text-[#799084] box-border border-t border-[#709786]/[0.25]">
         <span>
           <span className="font-sans text-[13px]">&copy;</span> 2026 Licere
         </span>
-        <nav className="flex items-center gap-[20px]">
-          <a href="#privacy" onClick={(e) => e.preventDefault()} className="text-[12px] font-medium text-muted-foreground no-underline transition-colors hover:text-foreground hover:underline">Privacidade</a>
-          <a href="#terms" onClick={(e) => e.preventDefault()} className="text-[12px] font-medium text-muted-foreground no-underline transition-colors hover:text-foreground hover:underline">Termos</a>
+        <nav className="flex items-center gap-5">
+          <a
+            href="#privacy"
+            onClick={(e) => e.preventDefault()}
+            className="text-[#799084] no-underline font-medium text-[12px] transition-colors duration-150 hover:text-[#173c2d] hover:underline"
+          >
+            Privacidade
+          </a>
+          <a
+            href="#terms"
+            onClick={(e) => e.preventDefault()}
+            className="text-[#799084] no-underline font-medium text-[12px] transition-colors duration-150 hover:text-[#173c2d] hover:underline"
+          >
+            Termos
+          </a>
         </nav>
       </footer>
 

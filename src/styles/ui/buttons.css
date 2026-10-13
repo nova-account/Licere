@@ -102,9 +102,18 @@
 
 @media (max-width: 768px) {
   .select-wrap,
+  button.custom-shadcn-trigger,
   .filter-btn {
-    flex: 1 1 calc(50% - 4px) !important;
+    flex: 1 1 0px !important;
+    width: calc(50% - 4px) !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 37px !important;
+    min-height: 37px !important;
+    max-height: 37px !important;
+    padding: 0 10px !important;
+    border-radius: 10px !important;
     justify-content: center !important;
-    height: 40px !important;
+    box-sizing: border-box !important;
   }
 }

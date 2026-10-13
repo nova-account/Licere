@@ -8,6 +8,7 @@
   align-items: center;
   padding: 24px;
   background: rgba(10, 32, 25, 0.32);
+  overscroll-behavior: contain;
 }
 
 /* ── Quick modal ── */

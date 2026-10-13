@@ -53,8 +53,11 @@
 .select-wrap {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 7px;
-  min-width: 170px;
+  width: 185px;
+  min-width: 185px;
+  max-width: 185px;
   height: 37px;
   padding: 0 12px;
   border: 1px solid #d9e3e6;
@@ -62,8 +65,12 @@
   color: #7b887d;
   background: #ffffff;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: border-color 0.15s, background-color 0.15s;
   box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.select-wrap:active {
+  transform: none !important;
 }
 
 .select-wrap:hover {
@@ -86,19 +93,36 @@
 }
 
 button.custom-shadcn-trigger {
+  width: 185px !important;
+  min-width: 185px !important;
+  max-width: 185px !important;
+  height: 37px !important;
+  padding: 0 12px !important;
   border: 1px solid #d9e3e6 !important;
   border-radius: 10px !important;
   color: #7b887d !important;
   background: #ffffff !important;
-  height: 37px !important;
-  padding: 0 12px !important;
-  min-width: 170px !important;
   box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;
+  font-size: 11px !important;
+  transform: none !important;
+}
+
+button.custom-shadcn-trigger:active {
+  transform: none !important;
 }
 
 button.custom-shadcn-trigger:hover {
   background: #f4f7f6 !important;
   border-color: #c7d4d6 !important;
+}
+
+button.custom-shadcn-trigger.custom-shadcn-trigger-sm {
+  width: 170px !important;
+  min-width: 170px !important;
+  max-width: 170px !important;
+  height: 35px !important;
+  padding: 0 12px !important;
+  border-radius: 10px !important;
 }
 
 /* ── List header ── */
@@ -172,10 +196,16 @@ button.custom-shadcn-trigger:hover {
 .data-table tbody tr {
   cursor: pointer;
   transition: background-color 0.12s ease;
+  transform: none !important;
 }
 
 .data-table tbody tr:hover {
   background: rgba(14, 80, 55, 0.035);
+  transform: none !important;
+}
+
+.data-table tbody tr:active {
+  transform: none !important;
 }
 
 .data-table td:first-child {
@@ -347,16 +377,27 @@ button.custom-shadcn-trigger:hover {
   }
 
   .filter-actions {
-    justify-content: space-between !important;
+    display: flex !important;
     flex-direction: row !important;
-    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px !important;
     width: 100% !important;
   }
 
   .select-wrap,
+  button.custom-shadcn-trigger,
   .filter-btn {
-    flex: 1 1 calc(50% - 4px) !important;
+    flex: 1 1 0px !important;
+    width: calc(50% - 4px) !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 37px !important;
+    min-height: 37px !important;
+    max-height: 37px !important;
+    padding: 0 10px !important;
+    border-radius: 10px !important;
     justify-content: center !important;
+    box-sizing: border-box !important;
   }
 
   .select-wrap select {

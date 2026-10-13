@@ -16,6 +16,13 @@ export function DrawerShell({
   onSave?: () => void;
   children: React.ReactNode;
 }) {
+  React.useEffect(() => {
+    document.body.classList.add('drawer-open');
+    return () => {
+      document.body.classList.remove('drawer-open');
+    };
+  }, []);
+
   return (
     <div
       className="drawer-backdrop"
@@ -23,15 +30,15 @@ export function DrawerShell({
     >
       <section className="detail-drawer animate-fade" aria-label="detalhes">
         <div className="drawer-head">
-          <div>
+          <div className="min-w-0 flex-1">
             <p className="eyebrow">{eyebrow}</p>
-            <h2>{title}</h2>
-            <span>{subtitle}</span>
+            <h2 className="break-words">{title}</h2>
+            <span className="truncate block">{subtitle}</span>
           </div>
           <button
             aria-label="fechar detalhes"
             onClick={onClose}
-            className="icon-btn"
+            className="icon-btn shrink-0"
           >
             <X size={18} />
           </button>
@@ -39,8 +46,8 @@ export function DrawerShell({
 
         <div className="drawer-content">{children}</div>
 
-        <div className="drawer-foot" style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          {onSave && (
+        {onSave && (
+          <div className="drawer-foot flex justify-end">
             <button
               className="primary-btn"
               onClick={() => {
@@ -51,8 +58,8 @@ export function DrawerShell({
               <Check size={16} />
               Salvar alterações
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </section>
     </div>
   );
