@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 export function Mark({ className = '' }: { className?: string }) {
   return (
@@ -19,7 +20,26 @@ export function Mark({ className = '' }: { className?: string }) {
 }
 
 export function PageHeader({ eyebrow, title, action, actionLabel }: { eyebrow: string; title: string; action?: () => void; actionLabel?: string }) {
-  return <div className="page-header animate-rise"><div><p className="eyebrow">{eyebrow}</p><h1>{title}</h1></div>{action && <button className="primary-btn" onClick={action}><span aria-hidden="true">+</span>{actionLabel}</button>}</div>;
+  return (
+    <div className="animate-rise mb-[31px] flex items-end justify-between gap-[30px] max-[760px]:flex-wrap max-[760px]:items-center max-[760px]:gap-[17px]">
+      <div>
+        <p className="hidden">{eyebrow}</p>
+        <h1 className="m-0 font-display text-[clamp(31px,3.1vw,44px)] leading-[1.1] font-extrabold tracking-[-0.075em] text-foreground max-[760px]:text-[30px]">
+          {title}
+        </h1>
+      </div>
+      {action && (
+        <Button
+          type="button"
+          onClick={action}
+          className="h-[38px] gap-[7px] rounded-[11px] border border-primary px-[15px] text-xs font-semibold shadow-[0_5px_12px_rgba(32,95,67,0.12)] hover:-translate-y-0.5 max-[760px]:self-end"
+        >
+          <span aria-hidden="true">+</span>
+          {actionLabel}
+        </Button>
+      )}
+    </div>
+  );
 }
 
 export function initials(name: string) {

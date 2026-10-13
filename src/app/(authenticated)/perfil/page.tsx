@@ -4,6 +4,11 @@ import React, { type FormEvent, useEffect, useState } from 'react';
 import { Check, Settings2, ShieldCheck } from 'lucide-react';
 import { PageHeader, initials } from '@/shared/ui';
 import { useAppData } from '@/lib/AppDataContext';
+import { Button } from '@/components/ui/button';
+
+const fieldLabelClass = 'flex flex-col gap-[7px] text-[10px] font-bold text-muted-foreground';
+const fieldInputClass =
+  'box-border h-[42px] w-full rounded-[9px] border border-input bg-card px-[11px] text-[12px] font-medium text-foreground outline-none focus:border-primary/60 focus:ring-[3px] focus:ring-primary/10';
 
 type Profile = {
   nome: string;
@@ -85,92 +90,77 @@ export default function PerfilPage() {
   };
 
   return (
-    <main className="content profile-page">
+    <main className="mx-auto max-w-[1500px] bg-background px-[48px] pt-[52px] pb-[84px] max-[1100px]:px-[28px] max-[760px]:px-[18px] max-[760px]:pt-[24px] max-[760px]:pb-[74px]">
       <PageHeader eyebrow="Conta e preferências" title="Perfil" />
 
-      <div className="profile-layout">
-        <section className="profile-intro">
-          <div className="profile-large-avatar">{initials(draft.nome)}</div>
-          <h2>{draft.nome}</h2>
-          <p>{draft.cargo}</p>
-          <span className="profile-chip">
+      <div className="grid grid-cols-[minmax(220px,0.52fr)_minmax(420px,1.48fr)] items-start gap-[18px] max-[800px]:grid-cols-1">
+        <section className="min-h-[320px] rounded-[16px] border border-border bg-card p-[27px] shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_16px_-3px_rgba(15,23,42,0.04)] max-[800px]:min-h-0 max-[800px]:p-[21px]">
+          <div className="grid size-[70px] place-items-center rounded-[22px] border-[5px] border-primary/15 bg-primary/20 font-mono text-[19px] font-bold text-primary">{initials(draft.nome)}</div>
+          <h2 className="mt-[23px] mb-[5px] font-display text-[21px] font-bold tracking-[-0.05em] text-foreground">{draft.nome}</h2>
+          <p className="m-0 text-[12px] text-muted-foreground">{draft.cargo}</p>
+          <span className="mt-[19px] inline-flex items-center gap-[5px] rounded-[8px] bg-primary/10 px-[9px] py-[6px] text-[10px] font-bold text-primary">
             <ShieldCheck size={13} />
             Acesso administrador
           </span>
-          <div className="profile-side-note">
+          <div className="mt-[48px] flex items-start gap-[9px] border-t border-border pt-[15px] text-[10px] leading-[1.5] text-muted-foreground [&_svg]:shrink-0 [&_svg]:text-muted-foreground max-[800px]:mt-[24px]">
             <Settings2 size={16} />
             <span>Preferências salvas localmente.</span>
           </div>
         </section>
 
-        <form className="settings-card" onSubmit={save}>
-          <div className="settings-heading">
+        <form className="rounded-[16px] border border-border bg-card p-[27px] shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_16px_-3px_rgba(15,23,42,0.04)] max-[800px]:p-[21px]" onSubmit={save}>
+          <div className="flex items-start justify-between gap-[18px] border-b border-border pb-[20px]">
             <div>
-              <p className="eyebrow">Dados pessoais</p>
-              <h2>Como podemos chamar você?</h2>
+              <p className="mt-0 mb-[8px] font-mono text-[10px] tracking-[0.13em] text-muted-foreground uppercase">Dados pessoais</p>
+              <h2 className="m-0 font-display text-[18px] font-bold tracking-[-0.045em] text-foreground">Como podemos chamar você?</h2>
             </div>
             {saved && (
-              <span className="saved-note">
+              <span className="inline-flex items-center gap-[5px] rounded-[7px] bg-primary/10 px-[9px] py-[6px] font-mono text-[10px] text-primary">
                 <Check size={14} />
                 Salvo com sucesso
               </span>
             )}
           </div>
 
-          <div className="profile-fields">
-            <label className="field-label">
+          <div className="grid grid-cols-2 gap-x-[16px] gap-y-[19px] pt-[24px] pb-[28px] max-[800px]:grid-cols-1 max-[800px]:gap-[16px]">
+            <label className={fieldLabelClass}>
               Nome completo
-              <input
-                value={draft.nome}
-                onChange={(e) => update('nome', e.target.value)}
-              />
+              <input className={fieldInputClass} value={draft.nome} onChange={(e) => update('nome', e.target.value)} />
             </label>
-            <label className="field-label">
+            <label className={fieldLabelClass}>
               E-mail corporativo
-              <input
-                type="email"
-                value={draft.email}
-                onChange={(e) => update('email', e.target.value)}
-              />
+              <input className={fieldInputClass} type="email" value={draft.email} onChange={(e) => update('email', e.target.value)} />
             </label>
-            <label className="field-label">
+            <label className={fieldLabelClass}>
               Cargo
-              <input
-                value={draft.cargo}
-                onChange={(e) => update('cargo', e.target.value)}
-              />
+              <input className={fieldInputClass} value={draft.cargo} onChange={(e) => update('cargo', e.target.value)} />
             </label>
-            <label className="field-label">
+            <label className={fieldLabelClass}>
               Empresa
-              <input
-                value={draft.empresa}
-                onChange={(e) => update('empresa', e.target.value)}
-              />
+              <input className={fieldInputClass} value={draft.empresa} onChange={(e) => update('empresa', e.target.value)} />
             </label>
-            <label className="field-label">
+            <label className={fieldLabelClass}>
               Telefone
-              <input
-                value={draft.telefone}
-                onChange={(e) => update('telefone', e.target.value)}
-              />
+              <input className={fieldInputClass} value={draft.telefone} onChange={(e) => update('telefone', e.target.value)} />
             </label>
           </div>
 
-          <div className="settings-foot">
-            <button
+          <div className="flex justify-end gap-[9px] border-t border-border pt-[18px]">
+            <Button
               type="button"
-              className="quiet-btn"
+              variant="outline"
+              className="h-8 rounded-[9px] border-input px-[10px] text-xs font-semibold text-muted-foreground hover:text-primary"
               onClick={() => {
                 setDraft(profile);
                 setSaved(false);
               }}
             >
               Cancelar
-            </button>
-            <button type="submit" className="primary-btn">
+            </Button>
+            <Button type="submit" className="h-[38px] gap-[7px] rounded-[11px] px-[15px] text-xs font-semibold shadow-[0_5px_12px_rgba(32,95,67,0.12)] hover:-translate-y-0.5">
               <Check size={16} />
               Salvar alterações
-            </button>
+            </Button>
           </div>
         </form>
       </div>
