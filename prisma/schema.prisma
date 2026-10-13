@@ -20,6 +20,7 @@ model Centro {
   licencas       Licenca[]
   condicionantes Condicionante[]
   documentos     Documento[]
+  usuarios       Usuario[]
 }
 
 model Licenca {
@@ -80,3 +81,20 @@ model Documento {
   condicionanteId String?
   condicionante   Condicionante? @relation(fields: [condicionanteId], references: [id])
 }
+
+model Usuario {
+  id         String   @id @default(cuid())
+  nome       String
+  email      String   @unique
+  senha      String   @default("licere123")
+  cargo      String
+  tipoAcesso String   @default("Administrador")
+  empresa    String   @default("Operações Brasil")
+  telefone   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  centroId String?
+  centro   Centro? @relation(fields: [centroId], references: [id])
+}
+
